@@ -1,12 +1,16 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
-  index,
+  text,
+  int,
+  json,
+  mysqlEnum,
   mysqlTableCreator,
   timestamp,
+  boolean,
   varchar,
 } from "drizzle-orm/mysql-core";
 
@@ -16,19 +20,89 @@ import {
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const mysqlTable = mysqlTableCreator((name) => `p4ds_frontend_${name}`);
+export const mysqlTable = mysqlTableCreator((name) => `frontend_${name}`);
 
-export const posts = mysqlTable(
-  "post",
+export const caseSessions = mysqlTable("case_sessions", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  caseId: int("case_id").notNull(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  liveStructure: json("live_structure").notNull(),
+  state: mysqlEnum("state", ["NOT_STARTED", "RUNNING", "FINISHED"])
+    .default("NOT_STARTED")
+    .notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const caseSessionsRelationship = relations(
+  caseSessions,
+  ({ many, one }) => ({
+    case: one(cases, {
+      fields: [caseSessions.caseId],
+      references: [cases.id],
+    }),
+    conversationComponents: many(conversationComponents),
+  }),
+);
+
+export type CaseSession = typeof caseSessions.$inferSelect;
+
+export const conversationComponents = mysqlTable(
+  "conversation_components",
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-    name: varchar("name", { length: 256 }),
+    caseSessionId: int("case_session_id").notNull(),
+    type: mysqlEnum("type", [
+      "CANDIDATE",
+      "INTERVIEWER",
+      "COMMAND",
+      "SYSTEM",
+    ]).notNull(),
+    sectionId: varchar("section_id", { length: 128 }).notNull(),
+    content: text("content").notNull(),
+    isVolatile: boolean("is_volatile").default(false).notNull(),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
   },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
-  })
+  // (table) => {
+  //   return {
+  //     createdAtIdx: index("created_at_idx").on(table.createdAt),
+  //   };
+  // },
 );
+
+export const conversationComponentsRelationship = relations(
+  conversationComponents,
+  ({ one }) => ({
+    case: one(caseSessions, {
+      fields: [conversationComponents.caseSessionId],
+      references: [caseSessions.id],
+    }),
+  }),
+);
+
+export type ConversationComponent = typeof conversationComponents.$inferSelect;
+export type ConversationComponentType = ConversationComponent["type"];
+
+export const cases = mysqlTable("cases", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  caseContent: json("case_content").notNull(),
+  caseTitle: varchar("case_title", { length: 255 }).notNull(),
+  caseDescription: varchar("case_description", { length: 1024 }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  difficulty: mysqlEnum("difficulty", ["EASY", "MEDIUM", "HARD"]).notNull(),
+  sector: mysqlEnum("sector", ["TECH", "FINANCE", "CONSULTING", "OTHER"]),
+  function: mysqlEnum("function", [
+    "DIGITAL",
+    "MARKETING",
+    "GROWTH",
+    "INVESTMENT",
+    "M&A",
+  ]),
+});
+
+export type Case = typeof cases.$inferSelect;

@@ -1,0 +1,60 @@
+{
+    "type": "SEQUENTIAL",
+    "children": [
+      {
+        "type": "INTRODUCTION",
+        "status": "PENDING",
+        "additionalCommands": [],
+        "additionalInformation": "",
+        "jsonType": "CASE_COMPONENT"
+      },
+      {
+        "type": "FRAMEWORK",
+        "status": "PENDING",
+        "additionalCommands": [],
+        "additionalInformation": "",
+        "jsonType": "CASE_COMPONENT"
+      },
+      {
+        "type": "PARALLEL",
+        "children": [
+          {
+            "type": "QUESTION",
+            "status": "PENDING",
+            "additionalCommands": [
+              "The candidate should ask about the infusion frequency and length. If the candidate doesn't and just stops at the number of patients trying to get the treatment, the interviewer should remind them that they need to estimate the infusion capacity shortfall.",
+              "The interviewer should share that the infusion must be administered once every 3 months and takes 2 hours to administer each time"
+            ],
+            "additionalInformation": [
+              "10% of people aged 60 - 80 have Alzheimers",
+              "We expect 50% of people with Alzheimers to try out/use our new treatment",
+              "The US is expected to have free capacity for 12M infusion hours per year at the time of launch for the Alzheimer’s treatment",
+              "Current Alzheimers medications are oral pills. Therefore, no infusion capacity gets reallocated from Alzheimer’s patients switching from their previous medication"
+            ],
+            "jsonType": "CASE_COMPONENT",
+            "questionType": "NUMERIC"
+          },
+          {
+            "type": "QUESTION",
+            "status": "PENDING",
+            "additionalCommands": [],
+            "additionalInformation": [
+              "Demand reduction methods e.g., adjusting our product to require fewer infusion hours and/or changing the mode of delivery is currently not feasible as any alterations to product delivery will delay the launch by 3 years.",
+              "While the government will not hinder our efforts to increase supply, they will also not actively help with policy or financing as well."
+            ],
+            "jsonType": "CASE_COMPONENT",
+            "questionType": "CREATIVE"
+          }
+        ],
+        "jsonType": "CASE_STRUCTURE"
+      },
+      {
+        "type": "SYNTHESIS",
+        "status": "PENDING",
+        "additionalCommands": [],
+        "additionalInformation": "",
+        "jsonType": "CASE_COMPONENT"
+      }
+    ],
+    "jsonType": "CASE_STRUCTURE"
+  }
