@@ -47,9 +47,9 @@ export const chatbotRouter = createTRPCRouter({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
 
-      console.log("Case Session creation succesfuly");
+      console.log("Case Session creation successful");
       const stateMachine = new Statemachine(theCase, caseSession);
-      console.log("Statemachine creation succesful");
+      console.log("Statemachine creation successful");
       await stateMachine.startCase();
 
       return caseSession.id;
@@ -91,22 +91,16 @@ export const chatbotRouter = createTRPCRouter({
       const currentSession = await db.query.caseSessions.findFirst({
         where: (caseSessions, { eq }) =>
           eq(caseSessions.userId, userId) && eq(caseSessions.id, sessionId),
+        with: {
+          case: true,
+        },
       });
 
       if (!currentSession) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      // get case
-      const theCase = await db.query.cases.findFirst({
-        where: eq(cases.id, currentSession.caseId),
-      });
-
-      if (!theCase) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
-
-      const chatbot = new Statemachine(theCase, currentSession);
+      const chatbot = new Statemachine(currentSession.case, currentSession);
 
       chatbot.addMessage(content, "CANDIDATE", false);
 
