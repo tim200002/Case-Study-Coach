@@ -104,8 +104,8 @@ export default function RealtimeChat(props: {
   });
 
   return (
-    <div className="flex max-h-full flex-col items-center p-2">
-      <ul className="grid w-1/2 grid-cols-3 space-y-5 overflow-scroll">
+    <div className="flex max-h-full flex-col items-center p-2 w-full">
+      <ul className="grid grid-cols-3 space-y-5 overflow-scroll">
         {conversation.map((message) => (
           <ChatBubble
             key={typeof message === "string" ? null : message.id}
