@@ -24,13 +24,25 @@ export function stripTag(text: string): {
     content: text.replace(tag, "").trim(),
   };
 }
-
 export function splitTags(text: string): string[] {
-  const pattern = /[A-Z]+: +[A-z]+/g;
-  const matches = text.match(pattern);
-  //console.log(matches);
-  if (!matches) {
+  // Pattern explanation:
+  // [A-Z]+: matches uppercase tags followed by a colon
+  // \\s* matches optional whitespace
+  // [\\s\\S]*? matches any characters including new lines, non-greedily
+  // (?=[A-Z]+:|$) is a positive lookahead for an uppercase tag followed by a colon or the end of the string
+  const pattern = /[A-Z]+:\s*([\s\S]*?)(?=[A-Z]+:|$)/g;
+
+  const matches = [];
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    // Remove the next tag from the end of the match, if present
+    const tagRemoved = match[0].replace(/\s+[A-Z]+:$/, '').trim();
+    matches.push(tagRemoved);
+  }
+
+  if (matches.length === 0) {
     throw new Error("No tag found in text: " + text);
   }
-  return matches.map((match) => match.trim());
+
+  return matches;
 }

@@ -3,8 +3,8 @@ import { splitTags, stripTag } from "~/chatbot/utils/formatters";
 
 test("Tag splitting test", () => {
   expect(splitTags("CANDIDATE: Hello")).toEqual(["CANDIDATE: Hello"]);
-  expect(splitTags("CANDIDATE: Hello INTERVIEWER: Hi")).toEqual([
-    "CANDIDATE: Hello",
+  expect(splitTags("CANDIDATE: Hello how are you INTERVIEWER: Hi")).toEqual([
+    "CANDIDATE: Hello how are you",
     "INTERVIEWER: Hi",
   ]);
   expect(splitTags("CANDIDATE: Hello INTERVIEWER: Hi \nSYSTEM: Hey")).toEqual([

@@ -28,9 +28,16 @@ export const chatbotRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      const parsedStructure = Parser.parseCaseTemplateToProperStateStructure(
-        theCase.caseContent,
-      );
+      //! This is an ugly hack. I dont know why it is necessary
+      let caseContentJson;
+      try {
+        caseContentJson = JSON.parse(theCase.caseContent as string);
+      } catch {
+        caseContentJson = theCase.caseContent;
+      }
+
+      const parsedStructure =
+        Parser.parseCaseTemplateToProperStateStructure(caseContentJson);
 
       const res = await db.insert(caseSessions).values({
         caseId,
@@ -99,7 +106,11 @@ export const chatbotRouter = createTRPCRouter({
       }
 
       const llm = new LanguageModel();
-      const chatbot = new Statemachine(currentSession.case, currentSession, llm);
+      const chatbot = new Statemachine(
+        currentSession.case,
+        currentSession,
+        llm,
+      );
 
       await chatbot.continueConversationAfterCandidateResponse(content);
 

@@ -12,7 +12,6 @@ import {
   ChatOutputValidator,
   NextSectionIdValidator,
 } from "../safety_filter/validators/validator_interface";
-import { prependTag } from "../utils/formatters";
 
 export type ExtendedContext =
   | {
@@ -27,11 +26,11 @@ export default class LanguageModel {
     this.llm = new OpenAI();
   }
 
-  async getCandidateResponse(
+  async getInterviewerResponse(
     conversationHistory: ConversationComponent[],
     extendedContext: ExtendedContext[] = [],
   ) {
-    const allowedTags: ConversationComponentType[] = ["CANDIDATE"];
+    const allowedTags: ConversationComponentType[] = ["INTERVIEWER"];
     return await this._getResponse(
       conversationHistory,
       allowedTags,
@@ -103,7 +102,6 @@ export default class LanguageModel {
     }>(
       conversationHistory,
       responseValidator,
-
       async (conversationHistory, extendedContext) => {
         let prompt =
           this._convertConversationHistoryToPrompt(conversationHistory);
@@ -111,6 +109,7 @@ export default class LanguageModel {
           prompt +=
             "\n\n" + this._convertExtendedContextToPrompt(extendedContext);
         }
+        console.log("Prompt: \n" + prompt);
         return await this.llm.predict(prompt);
       },
       extendedContext,

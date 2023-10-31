@@ -34,10 +34,6 @@ export class CaseStructureComponent {
       if (child instanceof CaseComponent) {
         if (child.status === Case_Component_Status.PENDING) {
           return [child];
-        } else if (child.status === Case_Component_Status.RUNNING) {
-          throw new Error(
-            "Elements to Continue only exist when no component is currently running",
-          );
         }
       } else if (child instanceof CaseStructureComponent) {
         const elementsToContinue = child.getElementsToContinueSequentially();

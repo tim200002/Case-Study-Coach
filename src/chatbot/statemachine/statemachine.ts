@@ -28,9 +28,14 @@ export class Statemachine {
   constructor(thisCase: Case, session: CaseSession, llm: LanguageModel) {
     this.case = thisCase;
     this.session = session;
-    this.parsedStructure = Parser.parseCaseStateFromJson(
-      JSON.parse(session.liveStructure as string),
-    );
+
+    let liveStructureJson;
+    try {
+      liveStructureJson = JSON.parse(session.liveStructure as string);
+    } catch {
+      liveStructureJson = session.liveStructure;
+    }
+    this.parsedStructure = Parser.parseCaseStateFromJson(liveStructureJson);
     this.llm = llm;
   }
 
@@ -77,10 +82,9 @@ export class Statemachine {
     }
 
     //! Normal case where user just responds to chatbot
-    const checkCompletionCommand = prependTag(
-      this.currentSection.getCheckCompletionPrompt(),
-      "COMMAND",
-    );
+    const checkCompletionCommand =
+      this.currentSection.getCheckCompletionPrompt();
+
     await this.addMessage(checkCompletionCommand, "COMMAND", true);
     await this.addMessage(content, "CANDIDATE", false);
 
@@ -88,11 +92,7 @@ export class Statemachine {
     const { parsedContent: isSectionCompleted, rawResponse } =
       await this.llm.getBooleanResponse(conversationHistory);
     console.log("Is section completed: " + isSectionCompleted);
-    await this.addMessage(
-      prependTag(rawResponse.content, rawResponse.type),
-      rawResponse.type,
-      true,
-    );
+    await this.addMessage(rawResponse.content, rawResponse.type, true);
 
     // check if we finished based on the response
     if (isSectionCompleted) {
@@ -101,26 +101,41 @@ export class Statemachine {
     }
 
     // We did not finish. Continue as always
-    const command2 = prependTag(
+
+    await this.addMessage(
       `Continue the conversation. Think about how to continue in a sensible way. Then respond with ${prependTag(
         "<your Response>",
         "INTERVIEWER",
       )}`,
       "COMMAND",
+      true,
     );
-    await this.addMessage(command2, "COMMAND", true);
 
     const conversationHistory2 = await this.getCurrentConversationHistory();
     const { parsedContent: continuedConversation } =
-      await this.llm.getCandidateResponse(conversationHistory2);
-    await this.addMessage(continuedConversation.content, "INTERVIEWER", false);
+      await this.llm.getInterviewerResponse(conversationHistory2);
+    await this.addMessage(
+      continuedConversation.content,
+      continuedConversation.type,
+      false,
+    );
   }
 
   private async initTransitionPhase() {
     if (this.nextPossibleStates.length === 0) {
       // close case
       await this.closeCase();
-    } else if (
+    }
+    // Advance to framework
+    else if (
+      this.nextPossibleStates.length === 1 &&
+      this.currentSection instanceof CaseIntroductionComponent
+    ) {
+      await this.advanceToState(this.nextPossibleStates[0]!.id);
+      await this.introduceCurrentSection();
+    }
+    // Advance to synthesis
+    else if (
       this.nextPossibleStates.length === 1 &&
       this.nextPossibleStates[0] instanceof CaseSynthesisComponent
     ) {
@@ -139,25 +154,29 @@ export class Statemachine {
       "COMMAND",
       false,
     );
-    const res2 = await this.llm.getCandidateResponse(
+    const res2 = await this.llm.getInterviewerResponse(
       await this.getCurrentConversationHistory(),
     );
-    await this.addMessage(res2.parsedContent.content, "INTERVIEWER", false);
+    await this.addMessage(
+      res2.parsedContent.content,
+      res2.parsedContent.type,
+      false,
+    );
   }
 
   private async closeCase() {
     this.currentSection.status = Case_Component_Status.COMPLETED;
     // One last message to candidate
-    const message = prependTag(
-      "Command: Thank the candidate for hist time and tell him that the case is closed now",
+    await this.addMessage(
+      "Thank the candidate for hist time and tell him that the case is closed now",
       "COMMAND",
+      true,
     );
-    await this.addMessage(message, "SYSTEM", true);
 
     const conversationHistory = await this.getCurrentConversationHistory();
     const { parsedContent } =
-      await this.llm.getCandidateResponse(conversationHistory);
-    await this.addMessage(parsedContent.content, "INTERVIEWER", false);
+      await this.llm.getInterviewerResponse(conversationHistory);
+    await this.addMessage(parsedContent.content, parsedContent.type, false);
 
     await db
       .update(caseSessions)
@@ -169,33 +188,29 @@ export class Statemachine {
   }
 
   private async transitionPhase1() {
-    const initTransitionMessage = prependTag(
+    await this.addMessage(
       "We finished the last section, successfully. Did the candidate already provide some indication where he wants to move next. If yes answer with SYSTEM: True, else with SYSTEM: False",
       "COMMAND",
+      true,
     );
-    await this.addMessage(initTransitionMessage, "SYSTEM", true);
     await this.setWaitForModelResponse();
 
     const conversationHistory = await this.getCurrentConversationHistory();
-    const { parsedContent: didProvideIndication } =
+    const { parsedContent: didProvideIndication, rawResponse } =
       await this.llm.getBooleanResponse(conversationHistory);
-    this.addMessage(
-      prependTag(String(didProvideIndication), "SYSTEM"),
-      "SYSTEM",
-      true,
-    );
+    this.addMessage(rawResponse.content, rawResponse.type, true);
 
     if (!didProvideIndication) {
-      const message = prependTag(
+      await this.addMessage(
         "Ask the candidate where he would like to move next",
         "COMMAND",
+        true,
       );
-      await this.addMessage(message, "SYSTEM", true);
 
       const conversationHistory = await this.getCurrentConversationHistory();
       const { parsedContent } =
-        await this.llm.getCandidateResponse(conversationHistory);
-      await this.addMessage(parsedContent!.content, "INTERVIEWER", false);
+        await this.llm.getInterviewerResponse(conversationHistory);
+      await this.addMessage(parsedContent.content, parsedContent.type, false);
       await this.setSessionState("TRANSITION_PHASE_2");
     } else {
       await this.setSessionState("TRANSITION_PHASE_3");
@@ -214,8 +229,7 @@ export class Statemachine {
       return `{id: ${state.id}, description: ${state.shortDescription}}`;
     });
     const optionsToContinueString = optionsToContinue.join("\n");
-    const message = prependTag(
-      `Command: Compare the candidates response of where to continue, with the possible options from the reference solution. The options are:
+    const message = `Compare the candidates response of where to continue, with the possible options from the reference solution. The options are:
       ${optionsToContinueString}
       
       If the candidate provided a close match respond with "${prependTag(
@@ -224,19 +238,13 @@ export class Statemachine {
       )}". Else choose one id of where to continue and respond with "${prependTag(
         "(False, <id>",
         "SYSTEM",
-      )}".`,
-      "COMMAND",
-    );
-    await this.addMessage(message, "SYSTEM", true);
+      )}".`;
+    await this.addMessage(message, "COMMAND", true);
     const res = await this.llm.getNextSectionResponse(
       await this.getCurrentConversationHistory(),
       this.nextPossibleStates.map((state) => state.id),
     );
-    await this.addMessage(
-      prependTag(res.rawResponse.content, res.rawResponse.type),
-      res.rawResponse.type,
-      true,
-    );
+    await this.addMessage(res.rawResponse.content, res.rawResponse.type, true);
     await this.advanceToState(res.parsedContent.nextSectionId);
 
     // now introduce the next section
@@ -410,13 +418,16 @@ export class Statemachine {
   }
 
   private async advanceToState(nextStateId: string) {
+    console.log("Advance to state " + nextStateId);
     function recursiveFindStateById(
       structureComponent: CaseStructureComponent,
       id: string,
     ): CaseComponent | null {
       for (const child of structureComponent.children) {
-        if (child instanceof CaseComponent && child.id === id) {
-          return child;
+        if (child instanceof CaseComponent) {
+          if (child.id === id) {
+            return child;
+          }
         } else if (child instanceof CaseStructureComponent) {
           const result = recursiveFindStateById(child, id);
           if (result) {

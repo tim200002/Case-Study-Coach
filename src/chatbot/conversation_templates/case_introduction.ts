@@ -12,7 +12,7 @@ export class CaseIntroductionTemplate implements ConversationTemplateInterface {
   }
 
   getIntroductionPrompt(): string {
-    return prependTag(this.caseComponent.caseStarter, "INTERVIEWER");
+    return this.caseComponent.caseStarter;
   }
 
   getCheckCompletionPrompt(): string {
@@ -27,6 +27,6 @@ If the section is not completed respond with ${prependTag(
       "True",
       "SYSTEM",
     )}.`;
-    return prependTag(completionPrompt, "COMMAND");
+    return completionPrompt;
   }
 }

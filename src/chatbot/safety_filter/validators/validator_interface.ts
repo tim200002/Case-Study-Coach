@@ -47,7 +47,7 @@ export class ChatOutputValidator
   repromt(): ExtendedContext {
     return {
       type: "COMMAND",
-      content: `Command: Do it again, but this time your response should be started with only of of the tags from the list [${this.allowedTags}]. It must also not continue after this tag.`,
+      content: `Do it again, but this time your response should be started with only of of the tags from the list [${this.allowedTags}]. It must also not continue after this tag.`,
     };
   }
 }
@@ -55,7 +55,11 @@ export class ChatOutputValidator
 export class BooleanValidator implements Validator<boolean> {
   validate(text: string) {
     console.log("Boolean validator " + text);
-    const cleanedText = text.replace("SYSTEM:", "").trim().toLowerCase();
+    const cleanedText = text
+      .replace("SYSTEM:", "")
+      .replace(".", "")
+      .trim()
+      .toLowerCase();
     console.log("cleaned text " + cleanedText);
     if (cleanedText === "true") {
       return { isValid: true, parsedContent: true };
@@ -85,7 +89,7 @@ export class NextSectionIdValidator
   }
 
   validate(text: string) {
-    const pattern = /SYSTEM:\s*\(([^,]+),\s*(\d+)\)/;
+    const pattern = /SYSTEM:\s*(?:\()?([^,]+),\s*(\d+)(?:\))?/;
     const match = text.match(pattern);
 
     if (!match) {
@@ -95,6 +99,7 @@ export class NextSectionIdValidator
       };
     }
 
+    // Extracting the matched groups
     const [_, useCandidateProposalString, nextSectionIdString] = match;
     if (!useCandidateProposalString || !nextSectionIdString) {
       return {

@@ -23,7 +23,9 @@ export async function safetyFilterString<T>(
   const MAX_REPROMTS = 3;
   for (let i = 0; i < MAX_REPROMTS; i++) {
     console.log(
-      `Safety Filter of class ${validator.constructor.name}. Iteration ${i}`,
+      `Safety Filter of class ${validator.constructor.name}. Iteration ${i}\n
+      The current extended context is ${JSON.stringify(localExtendedContext)}
+      `,
     );
     const modelResponse = await getResponseCallback(
       conversationHistory,
@@ -31,7 +33,7 @@ export async function safetyFilterString<T>(
     );
     const { isValid, parsedContent } = validator.validate(modelResponse);
     if (isValid) {
-      if (!parsedContent) {
+      if (parsedContent === null) {
         throw new Error("Result is valid but parsed content is still null");
       }
       return { parsedContent };
