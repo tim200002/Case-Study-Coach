@@ -65,6 +65,7 @@ export const conversationComponents = mysqlTable(
       "INTERVIEWER",
       "COMMAND",
       "SYSTEM",
+      "UNDEFINED",
     ]).notNull(),
     sectionId: varchar("section_id", { length: 128 }).notNull(),
     content: text("content").notNull(),
@@ -92,6 +93,17 @@ export const conversationComponentsRelationship = relations(
 
 export type ConversationComponent = typeof conversationComponents.$inferSelect;
 export type ConversationComponentType = ConversationComponent["type"];
+export function isConversationComponentType(
+  text: string,
+): text is ConversationComponentType {
+  return [
+    "CANDIDATE",
+    "INTERVIEWER",
+    "COMMAND",
+    "SYSTEM",
+    "UNDEFINED",
+  ].includes(text);
+}
 
 export const cases = mysqlTable("cases", {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),

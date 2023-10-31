@@ -1,33 +1,29 @@
 import { ExtendedContext } from "~/chatbot/llm/language_model";
-import { splitTags, stripTag } from "~/chatbot/utils/formatters";
+import { ParsedModelResponse } from "~/chatbot/statemachine/types";
+import { prependTag, splitTags } from "~/chatbot/utils/formatters";
 import { ConversationComponentType } from "~/server/db/schema";
 
-export interface Validator<T> {
-  validate: (text: string) => { isValid: boolean; parsedContent: T | null };
+export interface Validator<A, T> {
+  validate: (input: A) => { isValid: boolean; parsedContent: T | null };
 
   repromt: () => ExtendedContext;
 }
 
 export class ChatOutputValidator
-  implements
-    Validator<{
-      type: ConversationComponentType;
-      content: string;
-    }>
+  implements Validator<string, ParsedModelResponse>
 {
   allowedTags: ConversationComponentType[];
   constructor(allowedTags: ConversationComponentType[]) {
     this.allowedTags = allowedTags;
   }
 
-  private validateLoose(text: string) {
+  private validateLoose(input: string) {
     try {
-      const inputSplit = splitTags(text);
+      const inputSplit = splitTags(input);
       if (inputSplit.length === 0) {
         return { isValid: false, parsedContent: null };
       }
-      const firstInput = inputSplit[0]!;
-      const { tag, content } = stripTag(firstInput);
+      const { tag, content } = inputSplit[0]!;
 
       if (!this.allowedTags.includes(tag)) {
         return { isValid: false, parsedContent: null };
@@ -40,8 +36,8 @@ export class ChatOutputValidator
     }
   }
 
-  validate(text: string) {
-    return this.validateLoose(text);
+  validate(input: string) {
+    return this.validateLoose(input);
   }
 
   repromt(): ExtendedContext {
@@ -52,15 +48,12 @@ export class ChatOutputValidator
   }
 }
 
-export class BooleanValidator implements Validator<boolean> {
-  validate(text: string) {
-    console.log("Boolean validator " + text);
-    const cleanedText = text
-      .replace("SYSTEM:", "")
-      .replace(".", "")
-      .trim()
-      .toLowerCase();
-    console.log("cleaned text " + cleanedText);
+export class BooleanValidator
+  implements Validator<ParsedModelResponse, boolean>
+{
+  validate(input: ParsedModelResponse) {
+    console.log("Boolean validator " + input);
+    const cleanedText = input.content.replace(".", "").trim().toLowerCase();
     if (cleanedText === "true") {
       return { isValid: true, parsedContent: true };
     } else if (cleanedText === "false") {
@@ -73,24 +66,30 @@ export class BooleanValidator implements Validator<boolean> {
   repromt(): ExtendedContext {
     return {
       type: "COMMAND",
-      content:
-        "Do it again, but this time respond with either SYSTEM: True or SYSTEM: False.",
+      content: `Do it again, but this time respond with either "${prependTag(
+        "True",
+        "SYSTEM",
+        true,
+      )}" or "${prependTag("False", "SYSTEM", true)}".`,
     };
   }
 }
 
 export class NextSectionIdValidator
   implements
-    Validator<{ useCandidateProposal: boolean; nextSectionId: string }>
+    Validator<
+      ParsedModelResponse,
+      { useCandidateProposal: boolean; nextSectionId: string }
+    >
 {
   possibleNextSectionIds: string[];
   constructor(possibleNextSectionIds: string[]) {
     this.possibleNextSectionIds = possibleNextSectionIds;
   }
 
-  validate(text: string) {
-    const pattern = /SYSTEM:\s*(?:\()?([^,]+),\s*(\d+)(?:\))?/;
-    const match = text.match(pattern);
+  validate(input: ParsedModelResponse) {
+    const pattern = /(?:\()?([^,]+),\s*(\d+)(?:\))?/;
+    const match = input.content.match(pattern);
 
     if (!match) {
       return {
@@ -130,7 +129,15 @@ export class NextSectionIdValidator
     const nextSectionIdsString = this.possibleNextSectionIds.join(", ");
     return {
       type: "COMMAND",
-      content: `Do it again, but this time respond with either "SYSTEM: (True, <id>)" or "SYSTEM: (False, <id>)". Remember that id must be any of [${nextSectionIdsString}].`,
+      content: `Do it again, but this time respond with either "${prependTag(
+        "(True, <id>)",
+        "SYSTEM",
+        true,
+      )}" or "${prependTag(
+        "(False, <id>)",
+        "SYSTEM",
+        true,
+      )}". Remember that id must be any of [${nextSectionIdsString}].`,
     };
   }
 }

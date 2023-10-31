@@ -12,13 +12,12 @@ import {
   ChatOutputValidator,
   NextSectionIdValidator,
 } from "../safety_filter/validators/validator_interface";
+import { prependTag } from "../utils/formatters";
 
-export type ExtendedContext =
-  | {
-      content: string;
-      type: ConversationComponentType;
-    }
-  | string;
+export type ExtendedContext = {
+  content: string;
+  type: ConversationComponentType;
+};
 
 export default class LanguageModel {
   llm: OpenAI;
@@ -110,7 +109,9 @@ export default class LanguageModel {
             "\n\n" + this._convertExtendedContextToPrompt(extendedContext);
         }
         console.log("Prompt: \n" + prompt);
-        return await this.llm.predict(prompt);
+        const modelResponse = await this.llm.predict(prompt);
+        console.log("Model response: " + modelResponse);
+        return modelResponse;
       },
       extendedContext,
     );
@@ -121,23 +122,17 @@ export default class LanguageModel {
   private _convertConversationHistoryToPrompt(
     conversation_history: ConversationComponent[],
   ) {
-    const prompt = conversation_history.map((component) => {
-      const prefix = component.type;
-      return `${prefix}: ${component.content}`;
-    });
+    const prompt = conversation_history.map((component) =>
+      prependTag(component.content, component.type),
+    );
 
     return prompt.join("\n\n");
   }
 
   private _convertExtendedContextToPrompt(extended_context: ExtendedContext[]) {
-    const prompt = extended_context.map((component) => {
-      if (typeof component === "string") {
-        return component;
-      }
-
-      const prefix = component.type;
-      return `${prefix}: ${component.content}`;
-    });
+    const prompt = extended_context.map((component) =>
+      prependTag(component.content, component.type),
+    );
 
     return prompt.join("\n\n");
   }

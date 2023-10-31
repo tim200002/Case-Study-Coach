@@ -3,7 +3,6 @@ import {
   CaseIntroductionComponent,
   CaseQuestionComponent,
 } from "../statemachine/case_component";
-import { prependTag } from "../utils/formatters";
 import ConversationTemplateInterface from "./conversation_template_interface";
 
 export class NumeracyTemplate implements ConversationTemplateInterface {
@@ -27,7 +26,7 @@ Start this section now by asking the candidate to solve the question. Make sure 
   }
 
   getCheckCompletionPrompt(): string {
-    const completionPrompt = `Command: Take the next response of the candidate to evaluate if this part of the case study is completed. To evaluate if the question is completed use the following criteria:
+    const completionPrompt = `Take the previous response of the candidate to evaluate if this part of the case study is completed. To evaluate if the question is completed use the following criteria:
 - Check if the candidate approach is right and if it guides us towards the goal, else help him to get on the right track
 - Check if the math is right, if not tell the candidate where he must redo calculations
 - Check if the candidate got to the complete result, only after that continue the case

@@ -4,11 +4,11 @@ import {
 } from "~/server/db/schema";
 import { Validator } from "./validators/validator_interface";
 import { ExtendedContext } from "../llm/language_model";
-import { prependTag } from "../utils/formatters";
+import { ParsedModelResponse } from "../statemachine/types";
 
 export async function safetyFilterString<T>(
   conversationHistory: ConversationComponent[],
-  validator: Validator<T>,
+  validator: Validator<string, T>,
 
   getResponseCallback: (
     conversationHistory: ConversationComponent[],
@@ -38,7 +38,7 @@ export async function safetyFilterString<T>(
       }
       return { parsedContent };
     }
-    localExtendedContext.push(modelResponse);
+    localExtendedContext.push({ content: modelResponse, type: "UNDEFINED" });
     localExtendedContext.push(validator.repromt());
   }
 
@@ -47,15 +47,12 @@ export async function safetyFilterString<T>(
 
 export async function safetyFilterParsedInput<T>(
   conversationHistory: ConversationComponent[],
-  validator: Validator<T>,
+  validator: Validator<ParsedModelResponse, T>,
 
   getResponseCallback: (
     conversationHistory: ConversationComponent[],
     extendedContext: ExtendedContext[],
-  ) => Promise<{
-    content: string;
-    type: ConversationComponentType;
-  }>,
+  ) => Promise<ParsedModelResponse>,
   extendedContext: ExtendedContext[] = [],
 ): Promise<{
   parsedContent: T;
@@ -72,20 +69,16 @@ export async function safetyFilterParsedInput<T>(
       conversationHistory,
       localExtendedContext,
     );
-    const { isValid, parsedContent } = validator.validate(
-      prependTag(modelResponse.content, modelResponse.type),
-    );
+    const { isValid, parsedContent } = validator.validate(modelResponse);
     if (isValid) {
       if (parsedContent === null) {
         throw new Error("Result is valid but parsed content is still null");
       }
       return { parsedContent, rawResponse: modelResponse };
     }
-    localExtendedContext.push(
-      prependTag(modelResponse.content, modelResponse.type),
-    );
+    localExtendedContext.push(modelResponse);
     localExtendedContext.push(validator.repromt());
   }
 
-  throw new Error("Too many repromts");
+  throw new Error("Too many reprompts");
 }

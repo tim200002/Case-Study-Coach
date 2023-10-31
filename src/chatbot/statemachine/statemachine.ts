@@ -15,9 +15,15 @@ import {
 } from "./case_component";
 import { db } from "~/server/db";
 import { eq } from "drizzle-orm";
-import getInitialPrimer from "../conversation_templates/initial_primer";
-import { prependTag } from "../utils/formatters";
 import LanguageModel from "../llm/language_model";
+import {
+  askCandidateWhereToMoveNextPrompt,
+  compareResponsesWhereToContinuePrompt,
+  continueConversationPrompt,
+  didCandidateProvideIndicationToContinuePrompt,
+  getInitialPrimer,
+  thankCandidateOnCaseEndingPrompt,
+} from "../conversation_templates/special_prompts";
 
 export class Statemachine {
   case: Case;
@@ -82,16 +88,15 @@ export class Statemachine {
     }
 
     //! Normal case where user just responds to chatbot
+    await this.addMessage(content, "CANDIDATE", false);
     const checkCompletionCommand =
-      this.currentSection.getCheckCompletionPrompt();
+    this.currentSection.getCheckCompletionPrompt();
 
     await this.addMessage(checkCompletionCommand, "COMMAND", true);
-    await this.addMessage(content, "CANDIDATE", false);
 
     const conversationHistory = await this.getCurrentConversationHistory();
     const { parsedContent: isSectionCompleted, rawResponse } =
       await this.llm.getBooleanResponse(conversationHistory);
-    console.log("Is section completed: " + isSectionCompleted);
     await this.addMessage(rawResponse.content, rawResponse.type, true);
 
     // check if we finished based on the response
@@ -102,14 +107,7 @@ export class Statemachine {
 
     // We did not finish. Continue as always
 
-    await this.addMessage(
-      `Continue the conversation. Think about how to continue in a sensible way. Then respond with ${prependTag(
-        "<your Response>",
-        "INTERVIEWER",
-      )}`,
-      "COMMAND",
-      true,
-    );
+    await this.addMessage(continueConversationPrompt(), "COMMAND", true);
 
     const conversationHistory2 = await this.getCurrentConversationHistory();
     const { parsedContent: continuedConversation } =
@@ -167,11 +165,7 @@ export class Statemachine {
   private async closeCase() {
     this.currentSection.status = Case_Component_Status.COMPLETED;
     // One last message to candidate
-    await this.addMessage(
-      "Thank the candidate for hist time and tell him that the case is closed now",
-      "COMMAND",
-      true,
-    );
+    await this.addMessage(thankCandidateOnCaseEndingPrompt(), "COMMAND", true);
 
     const conversationHistory = await this.getCurrentConversationHistory();
     const { parsedContent } =
@@ -189,7 +183,7 @@ export class Statemachine {
 
   private async transitionPhase1() {
     await this.addMessage(
-      "We finished the last section, successfully. Did the candidate already provide some indication where he wants to move next. If yes answer with SYSTEM: True, else with SYSTEM: False",
+      didCandidateProvideIndicationToContinuePrompt(),
       "COMMAND",
       true,
     );
@@ -201,7 +195,7 @@ export class Statemachine {
 
     if (!didProvideIndication) {
       await this.addMessage(
-        "Ask the candidate where he would like to move next",
+        askCandidateWhereToMoveNextPrompt(),
         "COMMAND",
         true,
       );
@@ -224,21 +218,11 @@ export class Statemachine {
   }
 
   private async transitionPhase3() {
-    const optionsToContinue = this.nextPossibleStates.map((state) => {
-      return `{id: ${state.id}, description: ${state.shortDescription}}`;
-    });
-    const optionsToContinueString = optionsToContinue.join("\n");
-    const message = `Compare the candidates response of where to continue, with the possible options from the reference solution. The options are:
-      ${optionsToContinueString}
-      
-      If the candidate provided a close match respond with "${prependTag(
-        "(True, <id>",
-        "SYSTEM",
-      )}". Else choose one id of where to continue and respond with "${prependTag(
-        "(False, <id>",
-        "SYSTEM",
-      )}".`;
-    await this.addMessage(message, "COMMAND", true);
+    await this.addMessage(
+      compareResponsesWhereToContinuePrompt(this.nextPossibleStates),
+      "COMMAND",
+      true,
+    );
     const res = await this.llm.getNextSectionResponse(
       await this.getCurrentConversationHistory(),
       this.nextPossibleStates.map((state) => state.id),
@@ -365,7 +349,7 @@ export class Statemachine {
     ): { stack: CaseStructureComponent[]; found: boolean } {
       const currentElement = structureStack[structureStack.length - 1];
       if (!currentElement) {
-        throw new Error("get Stack To Element Recusively error");
+        throw new Error("get Stack To Element Recursively error");
       }
 
       for (const child of currentElement.children) {
