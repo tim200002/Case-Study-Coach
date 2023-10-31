@@ -3,7 +3,7 @@ import { splitTags, stripTag } from "~/chatbot/utils/formatters";
 import { ConversationComponentType } from "~/server/db/schema";
 
 export interface Validator<T> {
-  validate: (text: string) => { isValid: boolean; parsedContent: T };
+  validate: (text: string) => { isValid: boolean; parsedContent: T | null };
 
   repromt: () => ExtendedContext;
 }
@@ -13,7 +13,7 @@ export class ChatOutputValidator
     Validator<{
       type: ConversationComponentType;
       content: string;
-    }|null >
+    }>
 {
   allowedTags: ConversationComponentType[];
   constructor(allowedTags: ConversationComponentType[]) {
@@ -21,18 +21,23 @@ export class ChatOutputValidator
   }
 
   private validateLoose(text: string) {
-    const inputSplit = splitTags(text);
-    if (inputSplit.length === 0) {
+    try {
+      const inputSplit = splitTags(text);
+      if (inputSplit.length === 0) {
+        return { isValid: false, parsedContent: null };
+      }
+      const firstInput = inputSplit[0]!;
+      const { tag, content } = stripTag(firstInput);
+
+      if (!this.allowedTags.includes(tag)) {
+        return { isValid: false, parsedContent: null };
+      }
+
+      return { isValid: true, parsedContent: { type: tag, content } };
+    } catch (e) {
+      console.log("Error: " + e);
       return { isValid: false, parsedContent: null };
     }
-    const firstInput = inputSplit[0]!;
-    const { tag, content } = stripTag(firstInput);
-
-    if (!this.allowedTags.includes(tag)) {
-      return { isValid: false, parsedContent: null };
-    }
-
-    return { isValid: true, parsedContent: { type: tag, content } };
   }
 
   validate(text: string) {
@@ -49,17 +54,15 @@ export class ChatOutputValidator
 
 export class BooleanValidator implements Validator<boolean> {
   validate(text: string) {
-    const cleanedText = text
-      .replace("SYSTEM:", "")
-      .replace(".", "")
-      .trim()
-      .toLowerCase();
+    console.log("Boolean validator " + text);
+    const cleanedText = text.replace("SYSTEM:", "").trim().toLowerCase();
+    console.log("cleaned text " + cleanedText);
     if (cleanedText === "true") {
       return { isValid: true, parsedContent: true };
     } else if (cleanedText === "false") {
       return { isValid: true, parsedContent: false };
     } else {
-      return { isValid: false, parsedContent: false };
+      return { isValid: false, parsedContent: null };
     }
   }
 
@@ -88,7 +91,7 @@ export class NextSectionIdValidator
     if (!match) {
       return {
         isValid: false,
-        parsedContent: { useCandidateProposal: false, nextSectionId: "" },
+        parsedContent: null,
       };
     }
 
@@ -96,7 +99,7 @@ export class NextSectionIdValidator
     if (!useCandidateProposalString || !nextSectionIdString) {
       return {
         isValid: false,
-        parsedContent: { useCandidateProposal: false, nextSectionId: "" },
+        parsedContent: null,
       };
     }
 
@@ -108,7 +111,7 @@ export class NextSectionIdValidator
     if (!this.possibleNextSectionIds.includes(nextSectionId)) {
       return {
         isValid: false,
-        parsedContent: { useCandidateProposal: false, nextSectionId: "" },
+        parsedContent: null,
       };
     }
 
@@ -122,7 +125,7 @@ export class NextSectionIdValidator
     const nextSectionIdsString = this.possibleNextSectionIds.join(", ");
     return {
       type: "COMMAND",
-      content: `Do it again, but this time respond with either "System: (True, <id>)" or "System: (False, <id>)". Remember that id must be any of [${nextSectionIdsString}].`,
+      content: `Do it again, but this time respond with either "SYSTEM: (True, <id>)" or "SYSTEM: (False, <id>)". Remember that id must be any of [${nextSectionIdsString}].`,
     };
   }
 }

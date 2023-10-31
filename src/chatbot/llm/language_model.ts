@@ -3,12 +3,16 @@ import {
   ConversationComponent,
   ConversationComponentType,
 } from "~/server/db/schema";
-import { safetyFilter } from "../safety_filter/safety_filter";
+import {
+  safetyFilterString,
+  safetyFilterParsedInput,
+} from "../safety_filter/safety_filter";
 import {
   BooleanValidator,
   ChatOutputValidator,
   NextSectionIdValidator,
 } from "../safety_filter/validators/validator_interface";
+import { prependTag } from "../utils/formatters";
 
 export type ExtendedContext =
   | {
@@ -17,7 +21,7 @@ export type ExtendedContext =
     }
   | string;
 
-export class LanguageModel {
+export default class LanguageModel {
   llm: OpenAI;
   constructor() {
     this.llm = new OpenAI();
@@ -49,7 +53,7 @@ export class LanguageModel {
 
   async getBooleanResponse(conversationHistory: ConversationComponent[]) {
     const responseValidator = new BooleanValidator();
-    return await safetyFilter<boolean>(
+    return await safetyFilterParsedInput<boolean>(
       conversationHistory,
       responseValidator,
       async (conversationHistory, extendedContext) => {
@@ -57,7 +61,7 @@ export class LanguageModel {
           conversationHistory,
           extendedContext,
         );
-        return res.rawResponse;
+        return res.parsedContent;
       },
     );
   }
@@ -70,7 +74,7 @@ export class LanguageModel {
       possibleNextSectionIds,
     );
 
-    return await safetyFilter<{
+    return await safetyFilterParsedInput<{
       useCandidateProposal: boolean;
       nextSectionId: string;
     }>(
@@ -81,7 +85,7 @@ export class LanguageModel {
           conversationHistory,
           extendedContext,
         );
-        return res.rawResponse;
+        return res.parsedContent;
       },
     );
   }
@@ -93,10 +97,10 @@ export class LanguageModel {
   ) {
     const responseValidator = new ChatOutputValidator(allowedTags);
 
-    const response = await safetyFilter<{
+    const response = await safetyFilterString<{
       type: ConversationComponentType;
       content: string;
-    } | null>(
+    }>(
       conversationHistory,
       responseValidator,
 

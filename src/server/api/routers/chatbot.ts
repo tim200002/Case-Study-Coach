@@ -10,6 +10,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { Parser } from "~/chatbot/statemachine/parser";
 import { Statemachine } from "~/chatbot/statemachine/statemachine";
+import LanguageModel from "~/chatbot/llm/language_model";
 
 export const chatbotRouter = createTRPCRouter({
   createNewSession: privateProcedure
@@ -31,8 +32,6 @@ export const chatbotRouter = createTRPCRouter({
         theCase.caseContent,
       );
 
-      console.log("Structure Parsing successful");
-
       const res = await db.insert(caseSessions).values({
         caseId,
         userId,
@@ -47,9 +46,8 @@ export const chatbotRouter = createTRPCRouter({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
 
-      console.log("Case Session creation successful");
-      const stateMachine = new Statemachine(theCase, caseSession);
-      console.log("Statemachine creation successful");
+      const llm = new LanguageModel();
+      const stateMachine = new Statemachine(theCase, caseSession, llm);
       await stateMachine.startCase();
 
       return caseSession.id;
@@ -67,7 +65,7 @@ export const chatbotRouter = createTRPCRouter({
           eq(caseSessions.userId, userId) && eq(caseSessions.id, sessionId),
         with: {
           conversationComponents: {
-            orderBy: (component, { desc }) => [desc(component.createdAt)],
+            orderBy: (component, { asc }) => [asc(component.createdAt)],
             where: (component, { inArray }) =>
               inArray(component.type, ["CANDIDATE", "INTERVIEWER"]),
           },
@@ -100,18 +98,16 @@ export const chatbotRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      const chatbot = new Statemachine(currentSession.case, currentSession);
+      const llm = new LanguageModel();
+      const chatbot = new Statemachine(currentSession.case, currentSession, llm);
 
-      chatbot.addMessage(content, "CANDIDATE", false);
-
-      // let run chatbot
-      console.log("Chatbot do your thing!");
-      const isCaseCompleted = false;
+      await chatbot.continueConversationAfterCandidateResponse(content);
 
       // if case is completed update session
+      const isCaseCompleted = false;
       if (isCaseCompleted) {
         await db.update(caseSessions).set({
-          state: "FINISHED",
+          state: "COMPLETED",
         });
       }
 
@@ -119,7 +115,7 @@ export const chatbotRouter = createTRPCRouter({
       const conversationHistory =
         await db.query.conversationComponents.findMany({
           where: eq(conversationComponents.caseSessionId, sessionId),
-          orderBy: (component, { desc }) => [desc(component.createdAt)],
+          orderBy: (component, { asc }) => [asc(component.createdAt)],
         });
 
       return {

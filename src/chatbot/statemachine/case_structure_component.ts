@@ -19,10 +19,17 @@ export class CaseStructureComponent {
     this.children = children;
   }
 
-  private getElementsToContinueSequentially(): (
-    | CaseComponent
-    | CaseStructureComponent
-  )[] {
+  getElementsToContinue() {
+    if (this.type === CASE_STRUCTURE_COMPONENT_TYPE.SEQUENTIAL) {
+      return this.getElementsToContinueSequentially();
+    } else if (this.type === CASE_STRUCTURE_COMPONENT_TYPE.PARALLEL) {
+      return this.getElementsToContinueParallel();
+    } else {
+      throw new Error("Unknown type");
+    }
+  }
+
+  private getElementsToContinueSequentially(): CaseComponent[] {
     for (const child of this.children) {
       if (child instanceof CaseComponent) {
         if (child.status === Case_Component_Status.PENDING) {
@@ -44,11 +51,8 @@ export class CaseStructureComponent {
     return [];
   }
 
-  private getElementsToContinueParallel(): (
-    | CaseComponent
-    | CaseStructureComponent
-  )[] {
-    const elementsToContinue: (CaseComponent | CaseStructureComponent)[] = [];
+  private getElementsToContinueParallel(): CaseComponent[] {
+    const elementsToContinue: CaseComponent[] = [];
     for (const child of this.children) {
       if (child instanceof CaseComponent) {
         if (child.status === Case_Component_Status.PENDING) {

@@ -22,10 +22,12 @@ export class CaseComponent {
   additionalCommands: string[];
   additionalInformation: string[];
   jsonType = JSON_TYPES.CASE_COMPONENT;
+  shortDescription: string;
 
   protected constructor(
     id: string,
     type: Case_Component_Type,
+    shortDescription: string,
     status?: Case_Component_Status,
     additionalCommands?: string[],
     additionalInformation?: string[],
@@ -35,6 +37,7 @@ export class CaseComponent {
     this.status = status ?? Case_Component_Status.PENDING;
     this.additionalCommands = additionalCommands ?? [];
     this.additionalInformation = additionalInformation ?? [];
+    this.shortDescription = shortDescription;
   }
 
   getIntroductionPrompt(): string {
@@ -71,24 +74,21 @@ class CaseComponentWithSolution extends CaseComponent {
   constructor(
     id: string,
     type: Case_Component_Type,
+    shortDescription: string,
     status: Case_Component_Status,
     solution: string,
     additionalCommands?: string[],
     additionalInformation?: string[],
   ) {
-    super(id, type, status, additionalCommands, additionalInformation);
-    this.solution = solution;
-  }
-
-  static fromJson(json: any, id: string|null) {
-    return new CaseComponentWithSolution(
-      id ?? json.id,
-      json.type,
-      json.status,
-      json.solution,
-      json.additionalCommands,
-      json.additionalInformation,
+    super(
+      id,
+      type,
+      shortDescription,
+      status,
+      additionalCommands,
+      additionalInformation,
     );
+    this.solution = solution;
   }
 }
 
@@ -104,6 +104,7 @@ export class CaseIntroductionComponent extends CaseComponent {
     super(
       id,
       Case_Component_Type.INTRODUCTION,
+      "Introduction of the Case",
       status,
       additionalCommands,
       additionalInformation,
@@ -111,7 +112,7 @@ export class CaseIntroductionComponent extends CaseComponent {
     this.caseStarter = caseStarter;
   }
 
-  static fromJson(json: any, id: string|null) {
+  static fromJson(json: any, id: string | null) {
     return new CaseIntroductionComponent(
       id ?? json.id,
       json.caseStarter,
@@ -133,6 +134,7 @@ class CaseFrameworkComponent extends CaseComponentWithSolution {
     super(
       id,
       Case_Component_Type.FRAMEWORK,
+      "Framework section. The goal is for the Candidate to come up with a framework to solve the case.",
       status,
       solution,
       additionalCommands,
@@ -140,7 +142,7 @@ class CaseFrameworkComponent extends CaseComponentWithSolution {
     );
   }
 
-  static fromJson(json: any, id: string|null) {
+  static fromJson(json: any, id: string | null) {
     return new CaseFrameworkComponent(
       id ?? json.id,
       json.status,
@@ -157,10 +159,12 @@ enum CASE_QUESTION_TYPE {
 }
 class CaseQuestionComponent extends CaseComponentWithSolution {
   questionType: CASE_QUESTION_TYPE;
+  question: string;
 
   constructor(
     id: string,
     status: Case_Component_Status,
+    question: string,
     solution: string,
     questionType: CASE_QUESTION_TYPE,
     additionalCommands?: string[],
@@ -169,18 +173,21 @@ class CaseQuestionComponent extends CaseComponentWithSolution {
     super(
       id,
       Case_Component_Type.QUESTION,
+      `A question to be answered by the candidate. The question is: ${question}`,
       status,
       solution,
       additionalCommands,
       additionalInformation,
     );
     this.questionType = questionType;
+    this.question = question;
   }
 
-  static fromJson(json: any, id: string|null) {
+  static fromJson(json: any, id: string | null) {
     return new CaseQuestionComponent(
       id ?? json.id,
       json.status,
+      json.question,
       json.solution,
       json.questionType,
       json.additionalCommands,
@@ -189,7 +196,7 @@ class CaseQuestionComponent extends CaseComponentWithSolution {
   }
 }
 
-class CaseSynthesisComponent extends CaseComponentWithSolution {
+export class CaseSynthesisComponent extends CaseComponentWithSolution {
   constructor(
     id: string,
     status: Case_Component_Status,
@@ -200,6 +207,7 @@ class CaseSynthesisComponent extends CaseComponentWithSolution {
     super(
       id,
       Case_Component_Type.SYNTHESIS,
+      "Synthesis section. The goal is for the Candidate to summarize the case and provide a recommendation.",
       status,
       solution,
       additionalCommands,
@@ -207,7 +215,7 @@ class CaseSynthesisComponent extends CaseComponentWithSolution {
     );
   }
 
-  static fromJson(json: any, id: string|null) {
+  static fromJson(json: any, id: string | null) {
     return new CaseSynthesisComponent(
       id ?? json.id,
       json.status,

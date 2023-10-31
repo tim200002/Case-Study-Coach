@@ -6,6 +6,8 @@
     "build": "next build",
     "db:push": "dotenv drizzle-kit push:mysql",
     "db:studio": "dotenv drizzle-kit studio",
+    "db:migrate": "dotenv drizzle-kit generate:mysql",
+    "migrations:push": "node -r esbuild-register src/server/db/migrate.ts",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
@@ -26,6 +28,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "superjson": "^1.13.1",
+    "undici": "^5.27.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

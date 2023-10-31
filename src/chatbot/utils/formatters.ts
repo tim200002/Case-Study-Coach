@@ -11,7 +11,7 @@ export function stripTag(text: string): {
   const pattern = /[A-Z]+: +/g;
   const matches = text.match(pattern);
   if (!matches) {
-    throw new Error("No tag found");
+    throw new Error("No tag found in text: " + text);
   }
   if (matches.length > 1) {
     throw new Error("Multiple tags found");
@@ -28,9 +28,9 @@ export function stripTag(text: string): {
 export function splitTags(text: string): string[] {
   const pattern = /[A-Z]+: +[A-z]+/g;
   const matches = text.match(pattern);
-  console.log(matches);
+  //console.log(matches);
   if (!matches) {
-    throw new Error("No tag found");
+    throw new Error("No tag found in text: " + text);
   }
   return matches.map((match) => match.trim());
 }

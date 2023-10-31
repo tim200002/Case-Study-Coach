@@ -4,8 +4,6 @@ import { JSON_TYPES } from "./types";
 
 export class Parser {
   static parseCaseStateFromJson(json: any): CaseStructureComponent {
-    //const json = JSON.parse(jsonString);
-
     function recursiveCaseStructureRunner(
       json: any,
     ): (CaseComponent | CaseStructureComponent)[] {

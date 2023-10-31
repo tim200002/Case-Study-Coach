@@ -1,0 +1,2 @@
+ALTER TABLE `frontend_case_sessions` MODIFY COLUMN `state` enum('NOT_STARTED','RUNNING','TRANSITION_PHASE_1','TRANSITION_PHASE_2','TRANSITION_PHASE_3','COMPLETED') NOT NULL DEFAULT 'NOT_STARTED';--> statement-breakpoint
+ALTER TABLE `frontend_case_sessions` ADD `next_step` enum('MODEL_RESPONSE','USER_INPUT');

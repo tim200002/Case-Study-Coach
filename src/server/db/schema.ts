@@ -27,9 +27,17 @@ export const caseSessions = mysqlTable("case_sessions", {
   caseId: int("case_id").notNull(),
   userId: varchar("user_id", { length: 255 }).notNull(),
   liveStructure: json("live_structure").notNull(),
-  state: mysqlEnum("state", ["NOT_STARTED", "RUNNING", "FINISHED"])
+  state: mysqlEnum("state", [
+    "NOT_STARTED",
+    "RUNNING",
+    "TRANSITION_PHASE_1",
+    "TRANSITION_PHASE_2",
+    "TRANSITION_PHASE_3",
+    "COMPLETED",
+  ])
     .default("NOT_STARTED")
     .notNull(),
+  nextStep: mysqlEnum("next_step", ["MODEL_RESPONSE", "USER_INPUT"]),
   createdAt: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
