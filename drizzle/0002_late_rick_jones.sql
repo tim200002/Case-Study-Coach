@@ -1,0 +1,1 @@
+ALTER TABLE `frontend_case_sessions` DROP COLUMN `next_step`;

@@ -6,7 +6,7 @@
     "build": "next build",
     "db:push": "dotenv drizzle-kit push:mysql",
     "db:studio": "dotenv drizzle-kit studio",
-    "db:migrate": "dotenv drizzle-kit generate:mysql",
+    "migrations:create": "dotenv drizzle-kit generate:mysql",
     "migrations:push": "node -r esbuild-register src/server/db/migrate.ts",
     "dev": "next dev",
     "lint": "next lint",

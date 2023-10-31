@@ -193,7 +193,6 @@ export class Statemachine {
       "COMMAND",
       true,
     );
-    await this.setWaitForModelResponse();
 
     const conversationHistory = await this.getCurrentConversationHistory();
     const { parsedContent: didProvideIndication, rawResponse } =
@@ -296,24 +295,6 @@ export class Statemachine {
       throw new Error("No current section");
     }
     return currentSection;
-  }
-
-  private async setWaitForUserInput() {
-    await db
-      .update(caseSessions)
-      .set({
-        nextStep: "USER_INPUT",
-      })
-      .where(eq(caseSessions.id, this.session.id));
-  }
-
-  private async setWaitForModelResponse() {
-    await db
-      .update(caseSessions)
-      .set({
-        nextStep: "MODEL_RESPONSE",
-      })
-      .where(eq(caseSessions.id, this.session.id));
   }
 
   private async setSessionState(state: CaseSession["state"]) {

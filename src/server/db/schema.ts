@@ -37,7 +37,6 @@ export const caseSessions = mysqlTable("case_sessions", {
   ])
     .default("NOT_STARTED")
     .notNull(),
-  nextStep: mysqlEnum("next_step", ["MODEL_RESPONSE", "USER_INPUT"]),
   createdAt: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

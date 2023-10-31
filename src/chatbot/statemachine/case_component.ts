@@ -123,7 +123,7 @@ export class CaseIntroductionComponent extends CaseComponent {
   }
 }
 
-class CaseFrameworkComponent extends CaseComponentWithSolution {
+export class CaseFrameworkComponent extends CaseComponentWithSolution {
   constructor(
     id: string,
     status: Case_Component_Status,
@@ -153,11 +153,11 @@ class CaseFrameworkComponent extends CaseComponentWithSolution {
   }
 }
 
-enum CASE_QUESTION_TYPE {
+export enum CASE_QUESTION_TYPE {
   NUMERIC = "NUMERIC",
   CREATIVE = "CREATIVE",
 }
-class CaseQuestionComponent extends CaseComponentWithSolution {
+export class CaseQuestionComponent extends CaseComponentWithSolution {
   questionType: CASE_QUESTION_TYPE;
   question: string;
 
