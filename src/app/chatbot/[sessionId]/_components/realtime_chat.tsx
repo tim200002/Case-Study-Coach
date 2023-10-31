@@ -1,7 +1,7 @@
 "use client";
 
-import { type } from "os";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Spinner from "~/app/_components/spinner";
 import { ConversationComponent } from "~/server/db/schema";
 import { api } from "~/trpc/react";
 
@@ -79,6 +79,7 @@ export default function RealtimeChat(props: {
   initialConversation: ConversationComponent[];
 }) {
   const { sessionId, initialConversation } = props;
+  const afterLastChatMessageRef = useRef<HTMLDivElement>(null);
   const [conversation, setConversation] =
     useState<(ConversationComponent | string)[]>(initialConversation);
   const [loading, setLoading] = useState(false);
@@ -88,11 +89,13 @@ export default function RealtimeChat(props: {
       const { content: newMessage } = data;
       setConversation([...conversation, newMessage]);
       setLoading(true);
+      afterLastChatMessageRef.current?.scrollIntoView();
     },
     onSuccess: (data) => {
       const { conversationHistory, isCaseCompleted } = data;
       setLoading(false);
       setConversation(conversationHistory);
+      afterLastChatMessageRef.current?.scrollIntoView();
     },
     onError: (data) => {
       setLoading(false);
@@ -101,7 +104,7 @@ export default function RealtimeChat(props: {
   });
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex max-h-full flex-col items-center p-2">
       <ul className="grid w-1/2 grid-cols-3 space-y-5 overflow-scroll">
         {conversation.map((message) => (
           <ChatBubble
@@ -109,8 +112,12 @@ export default function RealtimeChat(props: {
             message={message}
           />
         ))}
+        <div ref={afterLastChatMessageRef} />
       </ul>
 
+      <div className="grow" />
+
+      {loading && <Spinner />}
       {!loading && (
         <ChatInput
           onSendMessage={(message) => mutate({ sessionId, content: message })}

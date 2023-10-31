@@ -25,9 +25,9 @@ export default async function Page({
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex min-h-screen flex-col">
+      <main className="flex h-screen flex-col">
         <Header />
-        <div className="flex flex-col">
+        <div className="bg-blue-200">
           {currentSession.state === "RUNNING" && (
             <RealtimeChat
               sessionId={sessionId}

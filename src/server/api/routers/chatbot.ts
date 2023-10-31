@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import {
   caseSessions,
   cases,
@@ -125,7 +125,10 @@ export const chatbotRouter = createTRPCRouter({
       // get full conversation histroy back
       const conversationHistory =
         await db.query.conversationComponents.findMany({
-          where: eq(conversationComponents.caseSessionId, sessionId),
+          where: and(
+            eq(conversationComponents.caseSessionId, sessionId),
+            inArray(conversationComponents.type, ["CANDIDATE", "INTERVIEWER"]),
+          ),
           orderBy: (component, { asc }) => [asc(component.createdAt)],
         });
 
