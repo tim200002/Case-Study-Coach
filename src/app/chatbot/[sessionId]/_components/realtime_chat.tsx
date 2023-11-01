@@ -71,6 +71,10 @@ export default function RealtimeChat(props: {
     },
   });
 
+  const handleSendMessage = (message: string) => {
+    mutate({ sessionId, content: message });
+  };
+
   return (
     <div className="flex max-h-full w-full flex-col items-center p-2">
       <ul className="grid grid-cols-3 space-y-5 overflow-scroll">
@@ -88,11 +92,11 @@ export default function RealtimeChat(props: {
       {loading && <Spinner />}
       {!loading && props.inputModality === INPUT_MODALITY.TEXT && (
         <TextInput
-          onSendMessage={(message) => mutate({ sessionId, content: message })}
+          onSendMessage={handleSendMessage}
         />
       )}
       {!loading && props.inputModality === INPUT_MODALITY.VOICE && (
-        <VoiceRecorderButton />
+        <VoiceRecorderButton onSendMessage={handleSendMessage} />
       )}
     </div>
   );
