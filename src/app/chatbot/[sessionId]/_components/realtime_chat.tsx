@@ -91,9 +91,7 @@ export default function RealtimeChat(props: {
 
       {loading && <Spinner />}
       {!loading && props.inputModality === INPUT_MODALITY.TEXT && (
-        <TextInput
-          onSendMessage={handleSendMessage}
-        />
+        <TextInput onSendMessage={handleSendMessage} />
       )}
       {!loading && props.inputModality === INPUT_MODALITY.VOICE && (
         <VoiceRecorderButton onSendMessage={handleSendMessage} />

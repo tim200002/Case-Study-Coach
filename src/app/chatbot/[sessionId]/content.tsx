@@ -18,7 +18,7 @@ export const MainContent = (props: {
   conversationHistory: ConversationComponent[];
 }) => {
   const { session, case: currentCase, conversationHistory } = props;
-  const [inputModality, setInputModality] = useState(INPUT_MODALITY.TEXT);
+  const [inputModality, setInputModality] = useState(INPUT_MODALITY.VOICE);
 
   return (
     <div className="flex grow flex-row  overflow-auto">
