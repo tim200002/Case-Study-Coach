@@ -4,6 +4,9 @@ import { useRef, useState } from "react";
 import Spinner from "~/app/_components/spinner";
 import { ConversationComponent } from "~/server/db/schema";
 import { api } from "~/trpc/react";
+import { TextInput } from "./text_input";
+import { INPUT_MODALITY } from "../content";
+import { VoiceRecorderButton } from "./voice_recorder";
 
 const ChatBubble = (props: { message: ConversationComponent | string }) => {
   const { message } = props;
@@ -38,45 +41,10 @@ const ChatBubble = (props: { message: ConversationComponent | string }) => {
   );
 };
 
-interface ChatInputProps {
-  onSendMessage: (message: string) => void;
-}
-
-const ChatInput = ({ onSendMessage }: ChatInputProps) => {
-  const [inputValue, setInputValue] = useState("");
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
-  };
-
-  const handleSendClick = () => {
-    if (inputValue.trim() !== "") {
-      onSendMessage(inputValue);
-      setInputValue("");
-    }
-  };
-
-  return (
-    <div className="mt-4 flex flex-row p-4">
-      <input
-        className="w-3/4 rounded-l-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none"
-        placeholder="Type your message here..."
-        value={inputValue}
-        onChange={handleInputChange}
-      />
-      <button
-        className={`w-1/4 rounded-r-lg bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700`}
-        onClick={handleSendClick}
-      >
-        Send
-      </button>
-    </div>
-  );
-};
-
 export default function RealtimeChat(props: {
   sessionId: number;
   initialConversation: ConversationComponent[];
+  inputModality: INPUT_MODALITY;
 }) {
   const { sessionId, initialConversation } = props;
   const afterLastChatMessageRef = useRef<HTMLDivElement>(null);
@@ -103,9 +71,13 @@ export default function RealtimeChat(props: {
     },
   });
 
+  const handleSendMessage = (message: string) => {
+    mutate({ sessionId, content: message });
+  };
+
   return (
-    <div className="flex max-h-full flex-col items-center p-2">
-      <ul className="grid w-1/2 grid-cols-3 space-y-5 overflow-scroll">
+    <div className="flex max-h-full w-full flex-col items-center p-2">
+      <ul className="grid grid-cols-3 space-y-5 overflow-scroll">
         {conversation.map((message) => (
           <ChatBubble
             key={typeof message === "string" ? null : message.id}
@@ -118,10 +90,11 @@ export default function RealtimeChat(props: {
       <div className="grow" />
 
       {loading && <Spinner />}
-      {!loading && (
-        <ChatInput
-          onSendMessage={(message) => mutate({ sessionId, content: message })}
-        />
+      {!loading && props.inputModality === INPUT_MODALITY.TEXT && (
+        <TextInput onSendMessage={handleSendMessage} />
+      )}
+      {!loading && props.inputModality === INPUT_MODALITY.VOICE && (
+        <VoiceRecorderButton onSendMessage={handleSendMessage} />
       )}
     </div>
   );

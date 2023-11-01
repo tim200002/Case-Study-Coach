@@ -76,6 +76,7 @@ export const chatbotRouter = createTRPCRouter({
             where: (component, { inArray }) =>
               inArray(component.type, ["CANDIDATE", "INTERVIEWER"]),
           },
+          case: true,
         },
       });
 

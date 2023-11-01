@@ -2,6 +2,10 @@ import Head from "next/head";
 import Header from "~/app/_components/header";
 import { api } from "~/trpc/server";
 import RealtimeChat from "./_components/realtime_chat";
+import { EvaluationComponent } from "./_components/evaluation_menu";
+import { Case } from "~/server/db/schema";
+import { Toggle } from "./_components/toggle";
+import { MainContent } from "./content";
 
 export default async function Page({
   params,
@@ -27,14 +31,11 @@ export default async function Page({
 
       <main className="flex h-screen flex-col">
         <Header />
-        <div className="grow  overflow-auto">
-          {currentSession.state === "RUNNING" && (
-            <RealtimeChat
-              sessionId={sessionId}
-              initialConversation={currentSession.conversationComponents}
-            />
-          )}
-        </div>
+        <MainContent
+          case={currentSession.case}
+          conversationHistory={currentSession.conversationComponents}
+          session={currentSession}
+        />
       </main>
     </>
   );
