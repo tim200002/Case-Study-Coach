@@ -9,7 +9,7 @@ export default function CaseTile(props: { caseData: Case }) {
   const router = useRouter();
 
   const { mutate: startCase } = api.chatbot.createNewSession.useMutation({
-    onSuccess(sessionId, variables, context) {
+    onSuccess(sessionId, context) {
       router.push(`/chatbot/${sessionId}`);
     },
   });

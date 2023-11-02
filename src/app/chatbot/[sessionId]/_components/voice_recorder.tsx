@@ -1,10 +1,22 @@
 import { IconMicrophone } from "@tabler/icons-react";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  TranscriptResponse,
+  VoiceRecorder,
+  VoiceRecorderState,
+} from "../_logic/voice_recorder";
+import { Modal } from "~/app/_components/modal";
+import { EvaluationStoreContext } from "../content";
+import { useStore } from "zustand";
 
 enum Recording_State {
   NOT_STARTED,
+  REQUESTING_MICROPHONE_PERMISSION,
+  MICROPHONE_PERMISSION_DENIED,
   RECORDING,
+  WAITING_FOR_TRANSCRIPTION,
   COMPLETED,
+  ERROR,
 }
 
 const TranscriptPopup = (props: {
@@ -34,27 +46,92 @@ const TranscriptPopup = (props: {
   );
 };
 
-export default TranscriptPopup;
-
 export const VoiceRecorderButton = (props: {
   onSendMessage: (message: string) => void;
 }) => {
+  const [transcriptHistory, setTranscriptHistory] = useState<
+    TranscriptResponse[]
+  >([]);
+  const [transcript, setTranscript] = useState("");
+
   const [recordingState, setRecordingState] = useState(
     Recording_State.NOT_STARTED,
   );
-  const [transcript, setTranscript] = useState("");
 
+  const evaluationStore = useContext(EvaluationStoreContext);
+  if (!evaluationStore)
+    throw new Error(
+      "Evaluation store not found. Did you forget to provide it?",
+    );
+  const addSpeechSpped = useStore(
+    evaluationStore,
+    (state) => state.addSpeechSpeed,
+  );
+
+  useEffect(() => {
+    // change transcript text
+    const transcriptText = transcriptHistory
+      .map((transcript) => {
+        return transcript.transcript;
+      })
+      .join(" ");
+    setTranscript(transcriptText);
+  }, [transcriptHistory]);
+
+  const voiceRecoderRef = useRef(new VoiceRecorder(setTranscriptHistory));
   const handleMicrophoneClick = () => {
-    if (recordingState === Recording_State.NOT_STARTED) {
-      setRecordingState(Recording_State.RECORDING);
-    } else if (recordingState === Recording_State.RECORDING) {
-      setRecordingState(Recording_State.COMPLETED);
+    // Start recording
+    if (
+      recordingState === Recording_State.NOT_STARTED &&
+      voiceRecoderRef.current.state === VoiceRecorderState.IDLE
+    ) {
+      // request microphone permission
+      (async () => {
+        // Show Popup that we are requesting microphone access.
+        // Wait for a short period before shoing the popup in case requesting microphone access is fast
+        const timeout = setTimeout(() => {
+          setRecordingState(Recording_State.REQUESTING_MICROPHONE_PERMISSION);
+        }, 250);
+
+        // check request microphone access
+        const successStartingRecording =
+          await voiceRecoderRef.current.startRecording();
+        clearTimeout(timeout);
+        if (!successStartingRecording) {
+          // Illustrate to use that we don't have microphone access and that he must change this
+          return setRecordingState(
+            Recording_State.MICROPHONE_PERMISSION_DENIED,
+          );
+        }
+        setRecordingState(Recording_State.RECORDING);
+      })();
+    }
+
+    // Stop recording
+    else if (
+      recordingState === Recording_State.RECORDING &&
+      voiceRecoderRef.current.state === VoiceRecorderState.RECORDING
+    ) {
+      setRecordingState(Recording_State.WAITING_FOR_TRANSCRIPTION);
+      voiceRecoderRef.current.stopRecording().then(() => {
+        setRecordingState(Recording_State.COMPLETED);
+      });
+    }
+    // error case
+    else {
+      throw new Error(
+        "Error in voice recorder state machine. Invalid state combination detected. The combination was " +
+          recordingState +
+          " and " +
+          voiceRecoderRef.current.state +
+          ".",
+      );
     }
   };
 
   const reset = () => {
     setRecordingState(Recording_State.NOT_STARTED);
-    setTranscript("");
+    setTranscriptHistory([]);
   };
 
   const handleCancel = () => {
@@ -68,42 +145,72 @@ export const VoiceRecorderButton = (props: {
     reset();
   };
 
+  const RequestionMicrophonePermissionPopup = () => {
+    return (
+      <Modal
+        title="Requesting Microphone Permission"
+        bodyText="We need your mice to transcribe your text. Please accept the popup on the top left of the screen."
+      />
+    );
+  };
+
+  const MicrophonePermissionDeniedPopup = () => {
+    return (
+      <Modal
+        title="Microphone Permission Denied"
+        bodyText="Please allow microphone access to use this feature. Else use the chat to send messages."
+        onOk={() => setRecordingState(Recording_State.NOT_STARTED)}
+      />
+    );
+  };
+
   return (
-    <div className="relative flex justify-center">
-      {(recordingState === Recording_State.RECORDING ||
-        recordingState === Recording_State.COMPLETED) && (
-        <TranscriptPopup
-          isEditable={recordingState === Recording_State.COMPLETED}
-          text={transcript}
-          setText={setTranscript}
-        />
+    <div>
+      {recordingState === Recording_State.REQUESTING_MICROPHONE_PERMISSION && (
+        <RequestionMicrophonePermissionPopup />
+      )}
+      {recordingState === Recording_State.MICROPHONE_PERMISSION_DENIED && (
+        <MicrophonePermissionDeniedPopup />
       )}
 
-      {recordingState == Recording_State.COMPLETED ? (
-        <div className="flex space-x-2">
+      <div className="relative flex justify-center">
+        {(recordingState === Recording_State.RECORDING ||
+          recordingState === Recording_State.COMPLETED) && (
+          <TranscriptPopup
+            isEditable={recordingState === Recording_State.COMPLETED}
+            text={transcript}
+            setText={setTranscript}
+          />
+        )}
+
+        {recordingState == Recording_State.COMPLETED ? (
+          <div className="flex space-x-2">
+            <button
+              onClick={handleCancel}
+              className="m-2 rounded bg-red-500 p-4 text-white"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAccept}
+              className="m-2 rounded bg-green-500 p-4 text-white"
+            >
+              Accept
+            </button>
+          </div>
+        ) : (
           <button
-            onClick={handleCancel}
-            className="m-2 rounded bg-red-500 p-4 text-white"
+            onClick={handleMicrophoneClick}
+            className={`m-2 rounded-full bg-blue-500 p-4 ${
+              recordingState === Recording_State.RECORDING
+                ? "animate-pulse"
+                : ""
+            }`}
           >
-            Cancel
+            <IconMicrophone size={24} color="white" />
           </button>
-          <button
-            onClick={handleAccept}
-            className="m-2 rounded bg-green-500 p-4 text-white"
-          >
-            Accept
-          </button>
-        </div>
-      ) : (
-        <button
-          onClick={handleMicrophoneClick}
-          className={`m-2 rounded-full bg-blue-500 p-4 ${
-            recordingState === Recording_State.RECORDING ? "animate-pulse" : ""
-          }`}
-        >
-          <IconMicrophone size={24} color="white" />
-        </button>
-      )}
+        )}
+      </div>
     </div>
   );
 };
