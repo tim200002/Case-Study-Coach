@@ -6,8 +6,6 @@ import {
   VoiceRecorderState,
 } from "../_logic/voice_recorder";
 import { Modal } from "~/app/_components/modal";
-import { EvaluationStoreContext } from "../content";
-import { useStore } from "zustand";
 
 enum Recording_State {
   NOT_STARTED,
@@ -58,15 +56,15 @@ export const VoiceRecorderButton = (props: {
     Recording_State.NOT_STARTED,
   );
 
-  const evaluationStore = useContext(EvaluationStoreContext);
-  if (!evaluationStore)
-    throw new Error(
-      "Evaluation store not found. Did you forget to provide it?",
-    );
-  const addSpeechSpped = useStore(
-    evaluationStore,
-    (state) => state.addSpeechSpeed,
-  );
+  // const evaluationStore = useContext(EvaluationStoreContext);
+  // if (!evaluationStore)
+  //   throw new Error(
+  //     "Evaluation store not found. Did you forget to provide it?",
+  //   );
+  // const addSpeechSpped = useStore(
+  //   evaluationStore,
+  //   (state) => state.addSpeechSpeed,
+  // );
 
   useEffect(() => {
     // change transcript text
