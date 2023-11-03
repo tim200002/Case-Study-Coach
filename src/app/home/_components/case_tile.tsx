@@ -15,8 +15,8 @@ export default function CaseTile(props: { caseData: Case }) {
   });
 
   return (
-    <div className="flex flex-col rounded border">
-      <h1 className="text-l">{caseTitle}</h1>
+    <div className="m-2 flex flex-col rounded border p-6 shadow-md">
+      <h1 className="text-l font-semibold">{caseTitle}</h1>
       <p className="text">{caseDescription}</p>
       <div className="flex flex-row">
         <div className="grow" />
