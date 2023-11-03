@@ -1,4 +1,3 @@
-import Head from "next/head";
 import Header from "~/app/_components/header";
 import { api } from "~/trpc/server";
 import RealtimeChat from "./_components/realtime_chat";
@@ -7,6 +6,11 @@ import { Case } from "~/server/db/schema";
 import { Toggle } from "./_components/toggle";
 import { MainContent } from "./content";
 import { Modal } from "~/app/_components/modal";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Solve the Case",
+};
 
 export default async function Page({
   params,
@@ -24,12 +28,6 @@ export default async function Page({
 
   return (
     <>
-      <Head>
-        <title>Chat</title>
-        <meta name="description" content="Solve the case" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <main className="flex h-screen flex-col">
         <Header />
         <MainContent
