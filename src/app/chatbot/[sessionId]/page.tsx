@@ -6,6 +6,7 @@ import { EvaluationComponent } from "./_components/evaluation_menu";
 import { Case } from "~/server/db/schema";
 import { Toggle } from "./_components/toggle";
 import { MainContent } from "./content";
+import { Modal } from "~/app/_components/modal";
 
 export default async function Page({
   params,

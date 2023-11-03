@@ -1,10 +1,43 @@
+import { eq } from "drizzle-orm";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
+import { caseSessions, cases } from "~/server/db/schema";
 
 export const caseRouter = createTRPCRouter({
   getAll: privateProcedure.query(async () => {
     const allCases = await db.query.cases.findMany();
     return allCases;
+  }),
+
+  getUserCases: privateProcedure.query(async ({ ctx }) => {
+    const userId = ctx.userId;
+
+    // Get case sessions with userIds
+    const userCaseSessions = await db.query.caseSessions.findMany({
+      where: eq(caseSessions.userId, userId),
+    });
+
+    // Get the cases for each session
+    const userCases = await Promise.all(
+      userCaseSessions.map(async (session) => {
+        return await db.query.cases.findFirst({
+          where: eq(cases.id, session.caseId),
+        });
+      }),
+    );
+
+    // Return State, name
+    const caseList = [];
+
+    for (let i = 0; i < userCases.length; i++) {
+      caseList.push({
+        caseTitle: userCases[i]!.caseTitle,
+        caseCompleted: userCaseSessions[i]!.state === "COMPLETED",
+        sessionId: userCaseSessions[i]!.id,
+      });
+    }
+
+    return caseList;
   }),
 
   // hello: publicProcedure

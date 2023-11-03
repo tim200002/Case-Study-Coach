@@ -5,12 +5,48 @@ import { Toggle } from "./_components/toggle";
 import RealtimeChat from "./_components/realtime_chat";
 import { EvaluationComponent } from "./_components/evaluation_menu";
 import { CaseInfo } from "./_components/case_info";
-import { useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
+import { WordSpeedEvaluator } from "./_logic/evaluator";
+
+import { createStore } from "zustand";
 
 export enum INPUT_MODALITY {
   TEXT,
   VOICE,
 }
+
+interface EvaluationState {
+  clarity: number | null;
+  engagement: number | null;
+  speechSpeed: number | null;
+
+  addClarity: (clarity: number) => void;
+  addEngagement: (engagement: number) => void;
+  addSpeechSpeed: (speechSpeed: number) => void;
+}
+// const useCreateEvaluationStore = () => {
+//   const wordSpeedevaluator = new WordSpeedEvaluator();
+
+//   const store = createStore<EvaluationState>()((set) => ({
+//     clarity: null,
+//     engagement: null,
+//     speechSpeed: null,
+
+//     addClarity: (clarity: number) => set({ clarity }),
+//     addEngagement: (engagement: number) => set({ engagement }),
+//     addSpeechSpeed: (speechSpeed: number) => set({ speechSpeed }),
+//   }));
+
+//   wordSpeedevaluator.addListener((score) =>
+//     store.setState({ speechSpeed: score }),
+//   );
+
+//   return store;
+// };
+
+// export const EvaluationStoreContext = createContext<
+//   typeof useCreateEvaluationStore | null
+// >(null);
 
 export const MainContent = (props: {
   session: CaseSession;
@@ -20,7 +56,10 @@ export const MainContent = (props: {
   const { session, case: currentCase, conversationHistory } = props;
   const [inputModality, setInputModality] = useState(INPUT_MODALITY.VOICE);
 
+  // const store = useRef(useCreateEvaluationStore);
+
   return (
+    // <EvaluationStoreContext.Provider value={store.current}>
     <div className="flex grow flex-row  overflow-auto">
       <div className=" flex w-1/3 flex-col items-start">
         <CaseInfo case={currentCase} />
@@ -48,5 +87,6 @@ export const MainContent = (props: {
         <EvaluationComponent clarity={3} engagement={8} speed={5} />
       </div>
     </div>
+    // </EvaluationStoreContext.Provider>
   );
 };

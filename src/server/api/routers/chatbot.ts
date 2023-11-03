@@ -10,7 +10,7 @@ import {
 import { TRPCError } from "@trpc/server";
 import { Parser } from "~/chatbot/statemachine/parser";
 import { Statemachine } from "~/chatbot/statemachine/statemachine";
-import LanguageModel from "~/chatbot/llm/language_model";
+import LanguageModel, { OpenAIWrapper } from "~/chatbot/llm/language_model";
 
 export const chatbotRouter = createTRPCRouter({
   createNewSession: privateProcedure
@@ -52,8 +52,8 @@ export const chatbotRouter = createTRPCRouter({
       if (!caseSession) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
-
-      const llm = new LanguageModel();
+      const wrapper = new OpenAIWrapper();
+      const llm = new LanguageModel(wrapper);
       const stateMachine = new Statemachine(theCase, caseSession, llm);
       await stateMachine.startCase();
 
@@ -106,7 +106,8 @@ export const chatbotRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      const llm = new LanguageModel();
+      const wrapper = new OpenAIWrapper();
+      const llm = new LanguageModel(wrapper);
       const chatbot = new Statemachine(
         currentSession.case,
         currentSession,

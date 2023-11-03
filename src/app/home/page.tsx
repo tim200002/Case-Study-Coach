@@ -2,6 +2,7 @@ import Head from "next/head";
 import { api } from "~/trpc/server";
 import Header from "../_components/header";
 import CaseTile from "./_components/case_tile";
+import CompletedCasesList from "./_components/completed_cases";
 
 export default async function Welcome() {
   const allCases = await api.case.getAll.query();
@@ -34,6 +35,7 @@ export default async function Welcome() {
 
           <div>
             <h1 className="text-xl font-bold">Your Stats</h1>
+            <CompletedCasesList />
           </div>
         </div>
       </main>

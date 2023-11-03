@@ -1,4 +1,5 @@
 import { OpenAI } from "langchain/llms/openai";
+import { GoogleVertexAI } from "langchain/llms/googlevertexai/web";
 import {
   ConversationComponent,
   ConversationComponentType,
@@ -19,10 +20,36 @@ export type ExtendedContext = {
   type: ConversationComponentType;
 };
 
-export default class LanguageModel {
-  llm: OpenAI;
+interface LangchainWrapperInterface {
+  predict(prompt: string): Promise<string>;
+}
+
+export class OpenAIWrapper implements LangchainWrapperInterface {
+  private llm: OpenAI;
   constructor() {
     this.llm = new OpenAI();
+  }
+
+  async predict(prompt: string) {
+    return await this.llm.predict(prompt);
+  }
+}
+
+export class VertexAIWrapper implements LangchainWrapperInterface {
+  private llm: GoogleVertexAI;
+  constructor() {
+    this.llm = new GoogleVertexAI();
+  }
+
+  async predict(prompt: string) {
+    return await this.llm.predict(prompt);
+  }
+}
+
+export default class LanguageModel {
+  llm: LangchainWrapperInterface;
+  constructor(llm: LangchainWrapperInterface) {
+    this.llm = llm;
   }
 
   async getInterviewerResponse(
