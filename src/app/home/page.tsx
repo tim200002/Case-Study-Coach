@@ -29,13 +29,15 @@ export default async function Welcome() {
             <h1 className="text-xl font-bold">Discover New Cases</h1>
             <CaseTileList />
           </div>
-
-          <div>
-            <h1 className="text-xl font-bold">Your Stats</h1>
-            <CompletedCasesList />
-          </div>
         </div>
       </main>
     </>
   );
 }
+
+/*
+  <div>
+    <h1 className="text-xl font-bold">Your Stats</h1>
+    <CompletedCasesList />
+  </div>
+*/
