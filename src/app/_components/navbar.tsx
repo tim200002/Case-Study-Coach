@@ -46,8 +46,8 @@ const Navbar = () => {
   const [activeItem, setActiveItem] = useState("/"); // Default active item is home page ('/')
 
   const navItems = [
-    { name: "Cases", href: "/cases" },
-    { name: "My Stats", href: "/stats" },
+    { name: "Cases", href: "/home" },
+    { name: "Stats", href: "/stats" },
     { name: "About", href: "/about" },
     // Add more items here
   ];

@@ -1,7 +1,6 @@
 import { api } from "~/trpc/server";
 import Header from "../_components/header";
 import CaseTile from "./_components/case_tile";
-import CompletedCasesList from "./_components/completed_cases";
 
 export const Metadata = {
   title: "Welcome to Cacey",
@@ -22,11 +21,14 @@ export default async function Welcome() {
 
   return (
     <>
-      <main className="flex min-h-screen flex-col">
-        <Header />
-        <div className="flex grow flex-row divide-x p-2">
-          <div className="w-2/3">
-            <h1 className="text-xl font-bold">Discover New Cases</h1>
+      <Header />
+      <main className="flex min-h-screen flex-col items-center">
+        <div className="w-full max-w-6xl px-4 md:px-6 lg:px-8">
+          {" "}
+          <div className="mt-4 w-full p-2">
+            <h1 className="text-center text-xl font-bold ">
+              Discover New Cases
+            </h1>{" "}
             <CaseTileList />
           </div>
         </div>
