@@ -26,8 +26,8 @@ export default async function Welcome() {
         <div className="w-full max-w-6xl px-4 md:px-6 lg:px-8">
           {" "}
           <div className="mt-4 w-full p-2">
-            <h1 className="text-center text-xl font-bold ">
-              Discover New Cases
+            <h1 className="my-4 mt-4 text-center text-4xl font-bold">
+              Discover cases
             </h1>{" "}
             <CaseTileList />
           </div>
@@ -36,10 +36,3 @@ export default async function Welcome() {
     </>
   );
 }
-
-/*
-  <div>
-    <h1 className="text-xl font-bold">Your Stats</h1>
-    <CompletedCasesList />
-  </div>
-*/
