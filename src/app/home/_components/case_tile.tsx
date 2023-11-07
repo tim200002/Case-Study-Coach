@@ -6,21 +6,12 @@ import { StarIcon } from "@heroicons/react/24/solid";
 
 export default function CaseTile(props: { caseData: Case }) {
   const { caseData } = props;
-  const { caseTitle, caseDescription, id } = caseData;
+  const { id, caseTitle, caseDescription, sector, difficulty } = caseData;
   const router = useRouter();
 
-  const tags = [
-    { type: "Interviewer-led" },
-    { difficulty: "Easy" },
-    { functionArea: "Operations" },
-    { sector: "Healthcare" },
-  ];
-
   const type = "Interviewer-led"; // Replace with caseData.type
-  const difficulty = "Easy"; // Replace with caseData.difficulty
-  const functionArea = "Operations"; // Replace with caseData.functionArea
-  const sector = "Healthcare"; // Replace with caseData.industry
   const rating = 4.5; // Replace with caseData.rating
+  const functionArea = "Operations"; // Replace with caseData.functionArea
 
   const renderStars = () => {
     const stars = [];
@@ -62,8 +53,11 @@ export default function CaseTile(props: { caseData: Case }) {
         </div>
       </div>
       <div className="mt-4 flex justify-end">
-        <button className="rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-300">
-          View case
+        <button
+          className="rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-300"
+          onClick={() => startCase({ caseId: id })}
+        >
+          Start Case
         </button>
       </div>
     </div>

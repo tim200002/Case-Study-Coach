@@ -1,6 +1,7 @@
 import { api } from "~/trpc/server";
 import Header from "../_components/header";
 import CaseTile from "./_components/case_tile";
+import CaseFilter from "./_components/filtered_case_list";
 
 export const Metadata = {
   title: "Welcome to Cacey",
@@ -9,7 +10,7 @@ export const Metadata = {
 export default async function Welcome() {
   const allCases = await api.case.getAll.query();
 
-  const CaseTileList = () => {
+  /*  const CaseTileList = () => {
     return (
       <ul>
         {allCases.map((caseData) => {
@@ -17,6 +18,32 @@ export default async function Welcome() {
         })}
       </ul>
     );
+  };*/
+
+  allCases.push({
+    id: 2,
+    caseContent: null,
+    caseTitle: "Test",
+    caseDescription: "Test",
+    function: "DIGITAL",
+    sector: "CONSULTING",
+    createdAt: new Date(),
+    difficulty: "MEDIUM",
+  });
+
+  allCases.push({
+    id: 3,
+    caseContent: null,
+    caseTitle: "Test",
+    caseDescription: "Test",
+    function: "DIGITAL",
+    sector: "FINANCE",
+    createdAt: new Date(),
+    difficulty: "MEDIUM",
+  });
+
+  const FilteredCases = () => {
+    return <CaseFilter cases={allCases} />;
   };
 
   return (
@@ -29,7 +56,7 @@ export default async function Welcome() {
             <h1 className="my-4 mt-4 text-center text-4xl font-bold">
               Discover cases
             </h1>{" "}
-            <CaseTileList />
+            <FilteredCases />
           </div>
         </div>
       </main>
