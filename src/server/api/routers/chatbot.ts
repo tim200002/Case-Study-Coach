@@ -14,17 +14,25 @@ import LanguageModel, {
   OpenAIWrapper,
   VertexAIWrapper,
 } from "~/chatbot/llm/language_model";
+import { getLlm } from "~/chatbot/llm/get_llm";
+import { supportedLanguageModelType } from "~/store/settings_store";
 
 //! Decide here which wrapper (i.e. openAI or Vertex to use)
 //const wrapper = new OpenAIWrapper();
-const wrapper = new VertexAIWrapper();
+//const wrapper = new VertexAIWrapper();
 
 export const chatbotRouter = createTRPCRouter({
   createNewSession: privateProcedure
-    .input(z.object({ caseId: z.number() }))
+    .input(
+      z.object({
+        caseId: z.number(),
+        languageModelType: z.custom<supportedLanguageModelType>(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.userId;
       const { caseId } = input;
+      const llmWrapper = getLlm(input.languageModelType);
 
       // load raw case information
       const theCase = await db.query.cases.findFirst({
@@ -59,7 +67,7 @@ export const chatbotRouter = createTRPCRouter({
       if (!caseSession) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
-      const llm = new LanguageModel(wrapper);
+      const llm = new LanguageModel(llmWrapper);
       const stateMachine = new Statemachine(theCase, caseSession, llm);
       await stateMachine.startCase();
 
@@ -94,10 +102,17 @@ export const chatbotRouter = createTRPCRouter({
     }),
 
   addResponse: privateProcedure
-    .input(z.object({ sessionId: z.number(), content: z.string() }))
+    .input(
+      z.object({
+        sessionId: z.number(),
+        content: z.string(),
+        languageModelType: z.custom<supportedLanguageModelType>(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const { sessionId, content } = input;
       const userId = ctx.userId;
+      const llmWrapper = getLlm(input.languageModelType);
 
       // get session
       const currentSession = await db.query.caseSessions.findFirst({
@@ -112,7 +127,7 @@ export const chatbotRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      const llm = new LanguageModel(wrapper);
+      const llm = new LanguageModel(llmWrapper);
       const chatbot = new Statemachine(
         currentSession.case,
         currentSession,

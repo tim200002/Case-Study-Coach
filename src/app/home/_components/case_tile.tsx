@@ -3,6 +3,7 @@ import type { Case } from "~/server/db/schema";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 import { StarIcon } from "@heroicons/react/24/solid";
+import { useSettingsStorage } from "~/store/settings_store";
 
 export default function CaseTile(props: { caseData: Case }) {
   const { caseData } = props;
@@ -12,6 +13,7 @@ export default function CaseTile(props: { caseData: Case }) {
   const type = "Interviewer-led"; // Replace with caseData.type
   const rating = 4.5; // Replace with caseData.rating
   const functionArea = "Operations"; // Replace with caseData.functionArea
+  const llmType = useSettingsStorage((state) => state.languageModel);
 
   const renderStars = () => {
     const stars = [];
@@ -29,7 +31,7 @@ export default function CaseTile(props: { caseData: Case }) {
   };
 
   const { mutate: startCase } = api.chatbot.createNewSession.useMutation({
-    onSuccess(sessionId, context) {
+    onSuccess(sessionId) {
       router.push(`/chatbot/${sessionId}`);
     },
   });
@@ -55,7 +57,7 @@ export default function CaseTile(props: { caseData: Case }) {
       <div className="mt-4 flex justify-end">
         <button
           className="rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-300"
-          onClick={() => startCase({ caseId: id })}
+          onClick={() => startCase({ caseId: id, languageModelType: llmType })}
         >
           Start Case
         </button>

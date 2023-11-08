@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import Spinner from "~/app/_components/spinner";
 import { ConversationComponent } from "~/server/db/schema";
 import { api } from "~/trpc/react";
 import { TextInput } from "./text_input";
-import { INPUT_MODALITY } from "../content";
 import { VoiceRecorderButton } from "./voice_recorder";
+import { useSettingsStorage } from "~/store/settings_store";
+import HydrationZustand from "~/utils/hydration_zustand";
 
 const ChatBubble = (props: { message: ConversationComponent | string }) => {
   const { message } = props;
@@ -44,13 +45,13 @@ const ChatBubble = (props: { message: ConversationComponent | string }) => {
 export default function RealtimeChat(props: {
   sessionId: number;
   initialConversation: ConversationComponent[];
-  inputModality: INPUT_MODALITY;
 }) {
   const { sessionId, initialConversation } = props;
   const afterLastChatMessageRef = useRef<HTMLDivElement>(null);
   const [conversation, setConversation] =
     useState<(ConversationComponent | string)[]>(initialConversation);
   const [loading, setLoading] = useState(false);
+  const settingsStore = useSettingsStorage();
 
   const { mutate } = api.chatbot.addResponse.useMutation({
     onMutate: (data) => {
@@ -72,7 +73,11 @@ export default function RealtimeChat(props: {
   });
 
   const handleSendMessage = (message: string) => {
-    mutate({ sessionId, content: message });
+    mutate({
+      sessionId,
+      content: message,
+      languageModelType: settingsStore!.languageModel,
+    });
   };
 
   return (
@@ -90,12 +95,14 @@ export default function RealtimeChat(props: {
       <div className="grow" />
 
       {loading && <Spinner />}
-      {!loading && props.inputModality === INPUT_MODALITY.TEXT && (
-        <TextInput onSendMessage={handleSendMessage} />
-      )}
-      {!loading && props.inputModality === INPUT_MODALITY.VOICE && (
-        <VoiceRecorderButton onSendMessage={handleSendMessage} />
-      )}
+      <HydrationZustand>
+        {!loading && settingsStore.inputModality === "Text" && (
+          <TextInput onSendMessage={handleSendMessage} />
+        )}
+        {!loading && settingsStore.inputModality === "Voice" && (
+          <VoiceRecorderButton onSendMessage={handleSendMessage} />
+        )}
+      </HydrationZustand>
     </div>
   );
 }
