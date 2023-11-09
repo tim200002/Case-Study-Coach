@@ -1,7 +1,7 @@
 import { api } from "~/trpc/server";
 import Header from "../_components/header";
 import CaseTile from "./_components/case_tile";
-import CompletedCasesList from "./_components/completed_cases";
+import CaseFilter from "./_components/filtered_case_list";
 
 export const Metadata = {
   title: "Welcome to Cacey",
@@ -10,7 +10,7 @@ export const Metadata = {
 export default async function Welcome() {
   const allCases = await api.case.getAll.query();
 
-  const CaseTileList = () => {
+  /*  const CaseTileList = () => {
     return (
       <ul>
         {allCases.map((caseData) => {
@@ -18,21 +18,45 @@ export default async function Welcome() {
         })}
       </ul>
     );
+  };*/
+
+  allCases.push({
+    id: 2,
+    caseContent: null,
+    caseTitle: "Test",
+    caseDescription: "Test",
+    function: "DIGITAL",
+    sector: "CONSULTING",
+    createdAt: new Date(),
+    difficulty: "MEDIUM",
+  });
+
+  allCases.push({
+    id: 3,
+    caseContent: null,
+    caseTitle: "Test",
+    caseDescription: "Test",
+    function: "DIGITAL",
+    sector: "FINANCE",
+    createdAt: new Date(),
+    difficulty: "MEDIUM",
+  });
+
+  const FilteredCases = () => {
+    return <CaseFilter cases={allCases} />;
   };
 
   return (
     <>
-      <main className="flex min-h-screen flex-col">
-        <Header />
-        <div className="flex grow flex-row divide-x p-2">
-          <div className="w-2/3">
-            <h1 className="text-xl font-bold">Discover New Cases</h1>
-            <CaseTileList />
-          </div>
-
-          <div>
-            <h1 className="text-xl font-bold">Your Stats</h1>
-            <CompletedCasesList />
+      <Header />
+      <main className="flex min-h-screen flex-col items-center">
+        <div className="w-full max-w-6xl px-4 md:px-6 lg:px-8">
+          {" "}
+          <div className="mt-4 w-full p-2">
+            <h1 className="my-4 mt-4 text-center text-4xl font-bold">
+              Discover cases
+            </h1>{" "}
+            <FilteredCases />
           </div>
         </div>
       </main>

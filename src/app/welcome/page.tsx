@@ -18,11 +18,13 @@ export default function Welcome() {
           <div className="grow" />
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="rounded border p-2">Sign in</button>
+              <button className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
+                Sign in
+              </button>
             </SignInButton>
             <div className="w-2" />
             <SignUpButton mode="modal">
-              <button className="rounded border bg-slate-300 p-2">
+              <button className="rounded bg-slate-200 px-4 py-2 font-bold text-black hover:bg-slate-300">
                 Sign up
               </button>
             </SignUpButton>

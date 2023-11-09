@@ -1,11 +1,11 @@
 import { IconMicrophone } from "@tabler/icons-react";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   TranscriptResponse,
   VoiceRecorder,
   VoiceRecorderState,
 } from "../_logic/voice_recorder";
-import { Modal } from "~/app/_components/modal";
+import { TextModal } from "~/app/_components/modal";
 
 enum Recording_State {
   NOT_STARTED,
@@ -145,18 +145,18 @@ export const VoiceRecorderButton = (props: {
 
   const RequestionMicrophonePermissionPopup = () => {
     return (
-      <Modal
+      <TextModal
         title="Requesting Microphone Permission"
-        bodyText="We need your mice to transcribe your text. Please accept the popup on the top left of the screen."
+        text="We need your mice to transcribe your text. Please accept the popup on the top left of the screen."
       />
     );
   };
 
   const MicrophonePermissionDeniedPopup = () => {
     return (
-      <Modal
+      <TextModal
         title="Microphone Permission Denied"
-        bodyText="Please allow microphone access to use this feature. Else use the chat to send messages."
+        text="Please allow microphone access to use this feature. Else use the chat to send messages."
         onOk={() => setRecordingState(Recording_State.NOT_STARTED)}
       />
     );

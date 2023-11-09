@@ -20,7 +20,7 @@ export type ExtendedContext = {
   type: ConversationComponentType;
 };
 
-interface LangchainWrapperInterface {
+export interface LangchainWrapperInterface {
   predict(prompt: string): Promise<string>;
 }
 
