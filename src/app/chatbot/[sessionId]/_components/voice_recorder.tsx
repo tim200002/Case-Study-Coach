@@ -1,11 +1,13 @@
 import { IconMicrophone } from "@tabler/icons-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import {
   TranscriptResponse,
   VoiceRecorder,
   VoiceRecorderState,
 } from "../_logic/voice_recorder";
 import { TextModal } from "~/app/_components/modal";
+import { useStore } from "zustand";
+import { EvaluationStoreContext } from "../content";
 
 enum Recording_State {
   NOT_STARTED,
@@ -47,36 +49,44 @@ const TranscriptPopup = (props: {
 export const VoiceRecorderButton = (props: {
   onSendMessage: (message: string) => void;
 }) => {
-  const [transcriptHistory, setTranscriptHistory] = useState<
-    TranscriptResponse[]
-  >([]);
   const [transcript, setTranscript] = useState("");
 
   const [recordingState, setRecordingState] = useState(
     Recording_State.NOT_STARTED,
   );
 
-  // const evaluationStore = useContext(EvaluationStoreContext);
-  // if (!evaluationStore)
-  //   throw new Error(
-  //     "Evaluation store not found. Did you forget to provide it?",
-  //   );
-  // const addSpeechSpped = useStore(
-  //   evaluationStore,
-  //   (state) => state.addSpeechSpeed,
-  // );
+  const evaluationStoreContext = useContext(EvaluationStoreContext);
+  if (!evaluationStoreContext)
+    throw new Error(
+      "Evaluation store not found. Did you forget to provide it?",
+    );
 
-  useEffect(() => {
-    // change transcript text
-    const transcriptText = transcriptHistory
+  const addSpeechSpeed = useStore(
+    evaluationStoreContext,
+    (state) => state.addSpeechSpeed,
+  );
+
+  const onNewTranscript = (transcripts: TranscriptResponse[]) => {
+    // calculate current transcript
+    const transcriptText = transcripts
       .map((transcript) => {
         return transcript.transcript;
       })
-      .join(" ");
+      .join("");
     setTranscript(transcriptText);
-  }, [transcriptHistory]);
 
-  const voiceRecoderRef = useRef(new VoiceRecorder(setTranscriptHistory));
+    // add evaluation metrics
+    if (
+      transcripts.length > 0 &&
+      transcripts[transcripts.length - 1]?.averageSpeedWPMCurrent
+    ) {
+      addSpeechSpeed(
+        transcripts[transcripts.length - 1]!.averageSpeedWPMCurrent!,
+      );
+    }
+  };
+
+  const voiceRecoderRef = useRef(new VoiceRecorder(onNewTranscript));
   const handleMicrophoneClick = () => {
     // Start recording
     if (
@@ -129,7 +139,7 @@ export const VoiceRecorderButton = (props: {
 
   const reset = () => {
     setRecordingState(Recording_State.NOT_STARTED);
-    setTranscriptHistory([]);
+    setTranscript("");
   };
 
   const handleCancel = () => {

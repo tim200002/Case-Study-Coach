@@ -12,6 +12,7 @@ export class WordSpeedEvaluator implements Evaluator<number> {
   }
 
   addInput(input: number) {
+    console.log("Word Speech Evaluatior input: " + input);
     this.scoreHistory.push(input);
 
     // caclulate new score using exponentially weighted moving average
