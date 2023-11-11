@@ -1,11 +1,6 @@
 import Header from "~/app/_components/header";
 import { api } from "~/trpc/server";
-import RealtimeChat from "./_components/realtime_chat";
-import { EvaluationComponent } from "./_components/evaluation_menu";
-import { Case } from "~/server/db/schema";
-import { Toggle } from "./_components/toggle";
 import { MainContent } from "./content";
-import { Modal } from "~/app/_components/modal";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

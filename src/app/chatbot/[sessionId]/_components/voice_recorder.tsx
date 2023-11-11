@@ -6,8 +6,8 @@ import {
   VoiceRecorderState,
 } from "../_logic/voice_recorder";
 import { TextModal } from "~/app/_components/modal";
-import { useStore } from "zustand";
-import { EvaluationStoreContext } from "../content";
+import { api } from "~/trpc/react";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 enum Recording_State {
   NOT_STARTED,
@@ -48,6 +48,7 @@ const TranscriptPopup = (props: {
 
 export const VoiceRecorderButton = (props: {
   onSendMessage: (message: string) => void;
+  sessionId: number;
 }) => {
   const [transcript, setTranscript] = useState("");
 
@@ -55,16 +56,12 @@ export const VoiceRecorderButton = (props: {
     Recording_State.NOT_STARTED,
   );
 
-  const evaluationStoreContext = useContext(EvaluationStoreContext);
-  if (!evaluationStoreContext)
-    throw new Error(
-      "Evaluation store not found. Did you forget to provide it?",
-    );
-
-  const addSpeechSpeed = useStore(
-    evaluationStoreContext,
-    (state) => state.addSpeechSpeed,
-  );
+  const queryClient = useQueryClient();
+  const { mutate } = api.chatbot.addConversationEvaluation.useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries().then(() => console.log("invalidated"));
+    },
+  });
 
   const onNewTranscript = (transcripts: TranscriptResponse[]) => {
     // calculate current transcript
@@ -75,14 +72,17 @@ export const VoiceRecorderButton = (props: {
       .join("");
     setTranscript(transcriptText);
 
-    // add evaluation metrics
-    if (
-      transcripts.length > 0 &&
-      transcripts[transcripts.length - 1]?.averageSpeedWPMCurrent
-    ) {
-      addSpeechSpeed(
-        transcripts[transcripts.length - 1]!.averageSpeedWPMCurrent!,
-      );
+    const currentTranscript = transcripts[transcripts.length - 1];
+    if (currentTranscript && currentTranscript.isFinal) {
+      console.log(currentTranscript);
+      const speechSpeed = currentTranscript.averageSpeedWPMCurrent!;
+      const speechClarity = currentTranscript.speechClarity!;
+      mutate({
+        sessionId: props.sessionId,
+        speechClarity,
+        speechSpeed,
+        content: currentTranscript.transcript,
+      });
     }
   };
 

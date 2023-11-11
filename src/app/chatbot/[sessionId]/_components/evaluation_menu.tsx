@@ -1,8 +1,7 @@
 "use client";
 
-import { useContext } from "react";
-import { EvaluationStoreContext } from "../content";
-import { useStore } from "zustand";
+import { api } from "~/trpc/react";
+import Spinner from "~/app/_components/spinner";
 
 export const EvaluationSlider = (props: { value: number | null }) => {
   // Linearly interpolate between start and end based on t (0 <= t <= 1)
@@ -31,11 +30,15 @@ export const EvaluationSlider = (props: { value: number | null }) => {
   );
 };
 
-export const EvaluationComponent = () => {
-  const evaluationStoreContext = useContext(EvaluationStoreContext);
-  if (!evaluationStoreContext) throw new Error("Evaluation store not found");
+export const EvaluationComponent = (props: { sessionId: number }) => {
+  const {
+    data: conversationEvaluationScore,
+    isLoading: conversationEvaluationLoading,
+  } = api.chatbot.getCurrentEvaluationScore.useQuery({
+    sessionId: props.sessionId,
+  });
 
-  const evaluationStore = useStore(evaluationStoreContext);
+  if (conversationEvaluationLoading) return <Spinner />;
 
   return (
     <div className="m-2 flex w-96 flex-col items-start space-y-4 rounded-md bg-white p-6 shadow-md">
@@ -45,21 +48,14 @@ export const EvaluationComponent = () => {
         <label className="mb-2 block text-sm font-bold text-gray-700">
           Clarity:
         </label>
-        <EvaluationSlider value={evaluationStore.clarity} />
+        <EvaluationSlider value={conversationEvaluationScore!.clarityScore} />
       </div>
 
       <div className="w-full">
         <label className="mb-2 block text-sm font-bold text-gray-700">
           Speed:
         </label>
-        <EvaluationSlider value={evaluationStore.speechSpeed} />
-      </div>
-
-      <div className="w-full">
-        <label className="mb-2 block text-sm font-bold text-gray-700">
-          Engagement:
-        </label>
-        {/* <EvaluationSlider value={evaluationStore.engagement} /> */}
+        <EvaluationSlider value={conversationEvaluationScore!.speedScore} />
       </div>
     </div>
   );

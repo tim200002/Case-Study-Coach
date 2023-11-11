@@ -7,7 +7,7 @@ await import("./src/env.mjs");
 /** @type {import("next").NextConfig} */
 const config = {
   experimental: {
-    serverActions: false,
+    serverActions: true,
   },
 };
 

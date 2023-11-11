@@ -100,7 +100,10 @@ export default function RealtimeChat(props: {
           <TextInput onSendMessage={handleSendMessage} />
         )}
         {!loading && settingsStore.inputModality === "Voice" && (
-          <VoiceRecorderButton onSendMessage={handleSendMessage} />
+          <VoiceRecorderButton
+            onSendMessage={handleSendMessage}
+            sessionId={sessionId}
+          />
         )}
       </HydrationZustand>
     </div>
