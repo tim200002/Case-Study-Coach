@@ -3,13 +3,21 @@ import { Socket, io } from "socket.io-client";
 
 const RECORDING_RATE = 500;
 
-export type TranscriptResponse = {
+type TranscriptResponseNonFinal = {
   transcript: string;
-  isFinal: boolean;
-  speechClarity?: number;
-  averageSpeedWPMCurrent?: number;
-  averageSpeedWPM?: number;
+  isFinal: false;
 };
+
+type TranscriptResponseFinal = {
+  transcript: string;
+  isFinal: true;
+  speechClarity: number;
+  speedWPM: number;
+};
+
+export type TranscriptResponse =
+  | TranscriptResponseNonFinal
+  | TranscriptResponseFinal;
 
 export enum VoiceRecorderState {
   IDLE,

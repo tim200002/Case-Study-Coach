@@ -1,11 +1,13 @@
 import { IconMicrophone } from "@tabler/icons-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   TranscriptResponse,
   VoiceRecorder,
   VoiceRecorderState,
 } from "../_logic/voice_recorder";
 import { TextModal } from "~/app/_components/modal";
+import { api } from "~/trpc/react";
+import { useQueryClient } from "@tanstack/react-query";
 
 enum Recording_State {
   NOT_STARTED,
@@ -46,37 +48,44 @@ const TranscriptPopup = (props: {
 
 export const VoiceRecorderButton = (props: {
   onSendMessage: (message: string) => void;
+  sessionId: number;
 }) => {
-  const [transcriptHistory, setTranscriptHistory] = useState<
-    TranscriptResponse[]
-  >([]);
   const [transcript, setTranscript] = useState("");
 
   const [recordingState, setRecordingState] = useState(
     Recording_State.NOT_STARTED,
   );
 
-  // const evaluationStore = useContext(EvaluationStoreContext);
-  // if (!evaluationStore)
-  //   throw new Error(
-  //     "Evaluation store not found. Did you forget to provide it?",
-  //   );
-  // const addSpeechSpped = useStore(
-  //   evaluationStore,
-  //   (state) => state.addSpeechSpeed,
-  // );
+  const queryClient = useQueryClient();
+  const { mutate } = api.chatbot.addConversationEvaluation.useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  });
 
-  useEffect(() => {
-    // change transcript text
-    const transcriptText = transcriptHistory
+  const onNewTranscript = (transcripts: TranscriptResponse[]) => {
+    // calculate current transcript
+    const transcriptText = transcripts
       .map((transcript) => {
         return transcript.transcript;
       })
-      .join(" ");
+      .join("");
     setTranscript(transcriptText);
-  }, [transcriptHistory]);
 
-  const voiceRecoderRef = useRef(new VoiceRecorder(setTranscriptHistory));
+    const currentTranscript = transcripts[transcripts.length - 1];
+    if (currentTranscript && currentTranscript.isFinal) {
+      const speechSpeed = currentTranscript.speedWPM;
+      const speechClarity = currentTranscript.speechClarity;
+      mutate({
+        sessionId: props.sessionId,
+        speechClarity,
+        speechSpeed,
+        content: currentTranscript.transcript,
+      });
+    }
+  };
+
+  const voiceRecoderRef = useRef(new VoiceRecorder(onNewTranscript));
   const handleMicrophoneClick = () => {
     // Start recording
     if (
@@ -129,7 +138,7 @@ export const VoiceRecorderButton = (props: {
 
   const reset = () => {
     setRecordingState(Recording_State.NOT_STARTED);
-    setTranscriptHistory([]);
+    setTranscript("");
   };
 
   const handleCancel = () => {

@@ -3,6 +3,7 @@ import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
 import { and, eq, inArray } from "drizzle-orm";
 import {
+  conversationEvaluationComponents,
   caseSessions,
   cases,
   conversationComponents,
@@ -16,6 +17,10 @@ import LanguageModel, {
 } from "~/chatbot/llm/language_model";
 import { getLlm } from "~/chatbot/llm/get_llm";
 import { supportedLanguageModelType } from "~/store/settings_store";
+import {
+  getClarityScore,
+  getSpeechSpeedScore,
+} from "~/server/utils/evaluation";
 
 //! Decide here which wrapper (i.e. openAI or Vertex to use)
 //const wrapper = new OpenAIWrapper();
@@ -157,6 +162,77 @@ export const chatbotRouter = createTRPCRouter({
       return {
         conversationHistory,
         isCaseCompleted,
+      };
+    }),
+
+  addConversationEvaluation: privateProcedure
+    .input(
+      z.object({
+        sessionId: z.number(),
+        content: z.string(),
+        speechClarity: z.number(),
+        speechSpeed: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // add change
+      const { sessionId, content, speechClarity, speechSpeed } = input;
+      await db.insert(conversationEvaluationComponents).values({
+        caseSessionId: sessionId,
+        content,
+        speechClarity,
+        speechSpeed,
+      });
+
+      // fetch again and calculate new scores
+      const limit = 15;
+      const results = await db.query.conversationEvaluationComponents.findMany({
+        where: eq(
+          conversationEvaluationComponents.caseSessionId,
+          input.sessionId,
+        ),
+        orderBy: (component, { asc }) => [asc(component.createdAt)],
+        limit: limit,
+      });
+
+      // calculate scores
+      const averageSpeedScore = getSpeechSpeedScore(
+        results.map((r) => r.speechSpeed),
+      );
+      const averageClairyScore = getClarityScore(
+        results.map((r) => r.speechClarity),
+      );
+
+      return {
+        speedScore: averageSpeedScore,
+        clarityScore: averageClairyScore,
+      };
+    }),
+
+  getCurrentEvaluationScore: privateProcedure
+    .input(z.object({ sessionId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const limit = 15;
+      const results = await db.query.conversationEvaluationComponents.findMany({
+        where: eq(
+          conversationEvaluationComponents.caseSessionId,
+          input.sessionId,
+        ),
+        orderBy: (component, { desc }) => [desc(component.createdAt)],
+        limit: limit,
+      });
+
+      // calculate scores
+      const averageSpeedScore = getSpeechSpeedScore(
+        results.map((r) => r.speechSpeed),
+      );
+      const averageClarityScore = getClarityScore(
+        results.map((r) => r.speechClarity),
+      );
+
+      return {
+        speedScore: averageSpeedScore,
+        clarityScore: averageClarityScore,
       };
     }),
 });

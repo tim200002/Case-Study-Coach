@@ -1,0 +1,2 @@
+ALTER TABLE `frontend_conversation_evaluation_components` MODIFY COLUMN `speech_clarity` float NOT NULL;--> statement-breakpoint
+ALTER TABLE `frontend_conversation_evaluation_components` MODIFY COLUMN `speech_speed` float NOT NULL;

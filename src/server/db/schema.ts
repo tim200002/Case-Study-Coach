@@ -12,6 +12,7 @@ import {
   timestamp,
   boolean,
   varchar,
+  float,
 } from "drizzle-orm/mysql-core";
 
 /**
@@ -104,6 +105,33 @@ export function isConversationComponentType(
     "UNDEFINED",
   ].includes(text);
 }
+
+export const conversationEvaluationComponents = mysqlTable(
+  "conversation_evaluation_components",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    caseSessionId: int("case_session_id").notNull(),
+    content: text("content").notNull(),
+    speechClarity: float("speech_clarity").notNull(),
+    speechSpeed: float("speech_speed").notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+);
+
+export type ConversationEvaluationComponent =
+  typeof conversationEvaluationComponents.$inferSelect;
+
+export const conversationEvaluationComponentsRelationship = relations(
+  conversationEvaluationComponents,
+  ({ one }) => ({
+    case: one(caseSessions, {
+      fields: [conversationEvaluationComponents.caseSessionId],
+      references: [caseSessions.id],
+    }),
+  }),
+);
 
 export const cases = mysqlTable("cases", {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),

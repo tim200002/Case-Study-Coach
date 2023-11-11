@@ -1,48 +1,22 @@
 "use client";
 
-import { Case, CaseSession, ConversationComponent } from "~/server/db/schema";
+import {
+  Case,
+  CaseSession,
+  ConversationComponent,
+  ConversationEvaluationComponent,
+} from "~/server/db/schema";
 import { Toggle } from "./_components/toggle";
 import RealtimeChat from "./_components/realtime_chat";
 import { EvaluationComponent } from "./_components/evaluation_menu";
 import { CaseInfo } from "./_components/case_info";
-import { useState } from "react";
+import { createContext, useRef, useState } from "react";
 
 import { SettingsModal } from "./_components/settings";
 import { IconSettings } from "@tabler/icons-react";
 import { useSettingsStorage } from "~/store/settings_store";
-
-interface EvaluationState {
-  clarity: number | null;
-  engagement: number | null;
-  speechSpeed: number | null;
-
-  addClarity: (clarity: number) => void;
-  addEngagement: (engagement: number) => void;
-  addSpeechSpeed: (speechSpeed: number) => void;
-}
-// const useCreateEvaluationStore = () => {
-//   const wordSpeedevaluator = new WordSpeedEvaluator();
-
-//   const store = createStore<EvaluationState>()((set) => ({
-//     clarity: null,
-//     engagement: null,
-//     speechSpeed: null,
-
-//     addClarity: (clarity: number) => set({ clarity }),
-//     addEngagement: (engagement: number) => set({ engagement }),
-//     addSpeechSpeed: (speechSpeed: number) => set({ speechSpeed }),
-//   }));
-
-//   wordSpeedevaluator.addListener((score) =>
-//     store.setState({ speechSpeed: score }),
-//   );
-
-//   return store;
-// };
-
-// export const EvaluationStoreContext = createContext<
-//   typeof useCreateEvaluationStore | null
-// >(null);
+import { StoreApi, createStore } from "zustand";
+import { api } from "~/trpc/react";
 
 export const MainContent = (props: {
   session: CaseSession;
@@ -54,10 +28,7 @@ export const MainContent = (props: {
 
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // const store = useRef(useCreateEvaluationStore);
-
   return (
-    // <EvaluationStoreContext.Provider value={store.current}>
     <div className="flex grow flex-row  overflow-auto">
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
 
@@ -83,7 +54,7 @@ export const MainContent = (props: {
         />
       )}
       <div className="flex w-1/3 flex-col items-end ">
-        <EvaluationComponent clarity={3} engagement={8} speed={5} />
+        <EvaluationComponent sessionId={session.id} />
         <div className="grow" />
         <button
           onClick={() => setSettingsOpen(true)}
@@ -94,6 +65,5 @@ export const MainContent = (props: {
         </button>
       </div>
     </div>
-    // </EvaluationStoreContext.Provider>
   );
 };
