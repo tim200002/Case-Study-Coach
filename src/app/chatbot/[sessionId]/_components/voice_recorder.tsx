@@ -1,5 +1,5 @@
 import { IconMicrophone } from "@tabler/icons-react";
-import React, { useContext, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   TranscriptResponse,
   VoiceRecorder,
@@ -7,7 +7,7 @@ import {
 } from "../_logic/voice_recorder";
 import { TextModal } from "~/app/_components/modal";
 import { api } from "~/trpc/react";
-import { QueryClient, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 enum Recording_State {
   NOT_STARTED,
@@ -59,7 +59,7 @@ export const VoiceRecorderButton = (props: {
   const queryClient = useQueryClient();
   const { mutate } = api.chatbot.addConversationEvaluation.useMutation({
     onSuccess: () => {
-      queryClient.invalidateQueries().then(() => console.log("invalidated"));
+      queryClient.invalidateQueries();
     },
   });
 
@@ -74,9 +74,8 @@ export const VoiceRecorderButton = (props: {
 
     const currentTranscript = transcripts[transcripts.length - 1];
     if (currentTranscript && currentTranscript.isFinal) {
-      console.log(currentTranscript);
-      const speechSpeed = currentTranscript.averageSpeedWPMCurrent!;
-      const speechClarity = currentTranscript.speechClarity!;
+      const speechSpeed = currentTranscript.speedWPM;
+      const speechClarity = currentTranscript.speechClarity;
       mutate({
         sessionId: props.sessionId,
         speechClarity,
