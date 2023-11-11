@@ -17,7 +17,7 @@ export const SpeedEvaluationSlider = (props: { value: number | null }) => {
       <div className="absolute right-0">Too fast</div>
       <div
         style={{ left: `${normalizedValue}%` }}
-        className="absolute h-5 w-5 -translate-x-1/2 transform rounded-full bg-blue-500" // Slider handle
+        className="transition-left absolute h-5 w-5 -translate-x-1/2 transform rounded-full bg-blue-500 duration-500 ease-in-out" // Slider handle
       ></div>
     </div>
   );
@@ -44,7 +44,7 @@ const EvaluationSlider = (props: { value: number | null }) => {
           width: `${props.value * 10}%`,
           backgroundColor: `rgb(${red}, ${green}, 0)`,
         }}
-        className="absolute h-5 rounded-full"
+        className="transition-width absolute h-5 rounded-full duration-500 ease-in-out"
       ></div>
     </div>
   );
@@ -75,7 +75,9 @@ export const EvaluationComponent = (props: { sessionId: number }) => {
         <label className="mb-2 block text-sm font-bold text-gray-700">
           Speed:
         </label>
-        <SpeedEvaluationSlider value={3} />
+        <SpeedEvaluationSlider
+          value={conversationEvaluationScore!.speedScore}
+        />
       </div>
     </div>
   );
