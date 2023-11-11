@@ -3,7 +3,27 @@
 import { api } from "~/trpc/react";
 import Spinner from "~/app/_components/spinner";
 
-export const EvaluationSlider = (props: { value: number | null }) => {
+export const SpeedEvaluationSlider = (props: { value: number | null }) => {
+  if (props.value === null) {
+    return <div className="relative h-5 rounded-full bg-gray-200" />;
+  }
+
+  // Assuming value ranges from -5 (too slow) to +5 (too fast), 0 being optimal
+  const normalizedValue = (props.value + 5) * 10; // Convert to a scale of 0 to 100
+
+  return (
+    <div className="relative flex h-5 items-center rounded-full bg-gray-200">
+      <div className="absolute left-0">Too slow</div>
+      <div className="absolute right-0">Too fast</div>
+      <div
+        style={{ left: `${normalizedValue}%` }}
+        className="absolute h-5 w-5 -translate-x-1/2 transform rounded-full bg-blue-500" // Slider handle
+      ></div>
+    </div>
+  );
+};
+
+const EvaluationSlider = (props: { value: number | null }) => {
   // Linearly interpolate between start and end based on t (0 <= t <= 1)
   const lerp = (start: number, end: number, t: number) => {
     return start + t * (end - start);
@@ -55,7 +75,7 @@ export const EvaluationComponent = (props: { sessionId: number }) => {
         <label className="mb-2 block text-sm font-bold text-gray-700">
           Speed:
         </label>
-        <EvaluationSlider value={conversationEvaluationScore!.speedScore} />
+        <SpeedEvaluationSlider value={3} />
       </div>
     </div>
   );
