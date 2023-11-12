@@ -1,10 +1,14 @@
+"use client";
 import { Modal } from "~/app/_components/modal";
 import {
   supportedLanguageModels,
   useSettingsStorage,
 } from "~/store/settings_store";
+import { Toggle } from "./toggle";
+import { useState } from "react";
+import { IconSettings } from "@tabler/icons-react";
 
-export const SettingsModal = (props: { onClose: () => void }) => {
+const SettingsModal = (props: { onClose: () => void }) => {
   const settingsStore = useSettingsStorage();
   const handleModelChange = (event: any) => {
     settingsStore.selectLanguageModel(event.target.value);
@@ -31,5 +35,40 @@ export const SettingsModal = (props: { onClose: () => void }) => {
         </select>
       </div>
     </Modal>
+  );
+};
+
+export const InputModalityToggle = () => {
+  const settingsStore = useSettingsStorage();
+
+  return (
+    <Toggle
+      label="Use Text Input"
+      isActive={settingsStore.inputModality === "Text"}
+      onChange={(isActive) => {
+        if (isActive) {
+          settingsStore.setInputModality("Text");
+        } else {
+          settingsStore.setInputModality("Voice");
+        }
+      }}
+    />
+  );
+};
+
+export const SettingsButton = () => {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  return (
+    <>
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+      <button
+        onClick={() => setSettingsOpen(true)}
+        className="fixed bottom-0 right-0 m-2 rounded-full bg-blue-500 p-2 text-white shadow-lg transition-colors duration-200 ease-in-out hover:bg-blue-600"
+        aria-label="Open Settings"
+      >
+        <IconSettings />
+      </button>
+    </>
   );
 };

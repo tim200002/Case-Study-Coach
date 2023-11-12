@@ -133,6 +133,16 @@ export const conversationEvaluationComponentsRelationship = relations(
   }),
 );
 
+export const CaseDifficultyLevels = ["EASY", "MEDIUM", "HARD"] as const;
+export const CaseSectorTypes = ["TECH", "FINANCE", "CONSULTING"] as const;
+export const CaseFunctionTypes = [
+  "DIGITAL",
+  "MARKETING",
+  "GROWTH",
+  "INVESTMENT",
+  "M&A",
+] as const;
+
 export const cases = mysqlTable("cases", {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
   caseContent: json("case_content").notNull(),
@@ -141,15 +151,9 @@ export const cases = mysqlTable("cases", {
   createdAt: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  difficulty: mysqlEnum("difficulty", ["EASY", "MEDIUM", "HARD"]).notNull(),
-  sector: mysqlEnum("sector", ["TECH", "FINANCE", "CONSULTING", "OTHER"]),
-  function: mysqlEnum("function", [
-    "DIGITAL",
-    "MARKETING",
-    "GROWTH",
-    "INVESTMENT",
-    "M&A",
-  ]),
+  difficulty: mysqlEnum("difficulty", CaseDifficultyLevels).notNull(),
+  sector: mysqlEnum("sector", CaseSectorTypes),
+  function: mysqlEnum("function", CaseFunctionTypes),
 });
 
 export type Case = typeof cases.$inferSelect;

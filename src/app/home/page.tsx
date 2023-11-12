@@ -1,50 +1,41 @@
-import { api } from "~/trpc/server";
 import Header from "../_components/header";
+import { Filter } from "./_components/case_filter";
+import { and, eq } from "drizzle-orm";
+import { db } from "~/server/db";
+import { Case, cases } from "~/server/db/schema";
+import { z } from "zod";
 import CaseTile from "./_components/case_tile";
-import CaseFilter from "./_components/filtered_case_list";
 
 export const Metadata = {
   title: "Welcome to Cacey",
 };
 
-export default async function Welcome() {
-  const allCases = await api.case.getAll.query();
-
-  /*  const CaseTileList = () => {
-    return (
-      <ul>
-        {allCases.map((caseData) => {
-          return <CaseTile key={caseData.id} caseData={caseData} />;
-        })}
-      </ul>
-    );
-  };*/
-
-  allCases.push({
-    id: 2,
-    caseContent: null,
-    caseTitle: "Test",
-    caseDescription: "Test",
-    function: "DIGITAL",
-    sector: "CONSULTING",
-    createdAt: new Date(),
-    difficulty: "MEDIUM",
+export default async function Welcome({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const querySchema = z.object({
+    sector: z.custom<Case["sector"]>(),
+    difficulty: z.custom<Case["difficulty"]>(),
+    function: z.custom<Case["function"]>(),
   });
 
-  allCases.push({
-    id: 3,
-    caseContent: null,
-    caseTitle: "Test",
-    caseDescription: "Test",
-    function: "DIGITAL",
-    sector: "FINANCE",
-    createdAt: new Date(),
-    difficulty: "MEDIUM",
-  });
+  const searchParamsParsed = querySchema.parse(searchParams);
 
-  const FilteredCases = () => {
-    return <CaseFilter cases={allCases} />;
-  };
+  const conditions = [];
+  if (searchParamsParsed.sector) {
+    conditions.push(eq(cases.sector, searchParamsParsed.sector));
+  }
+  if (searchParamsParsed.difficulty) {
+    conditions.push(eq(cases.difficulty, searchParamsParsed.difficulty));
+  }
+  if (searchParamsParsed.function) {
+    conditions.push(eq(cases.function, searchParamsParsed.function));
+  }
+  const filteredCases = await db.query.cases.findMany({
+    where: and(...conditions),
+  });
 
   return (
     <>
@@ -56,7 +47,12 @@ export default async function Welcome() {
             <h1 className="my-4 mt-4 text-center text-4xl font-bold">
               Discover cases
             </h1>{" "}
-            <FilteredCases />
+            <Filter searchParams={searchParams} />
+            <div>
+              {filteredCases.map((caseItem: Case) => (
+                <CaseTile key={caseItem.id} caseData={caseItem} />
+              ))}
+            </div>
           </div>
         </div>
       </main>
