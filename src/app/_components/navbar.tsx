@@ -1,50 +1,15 @@
-// components/Navbar.tsx
 "use client";
-
+// components/Navbar.tsx
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 import Logo from "../../../public/favicon.ico";
 
 import { UserButton } from "@clerk/nextjs";
-
-/*
-
-const Navbar = () => {
-  return (
-    <nav className="flex items-center justify-between border-b border-gray-200 bg-white py-4">
-      <div className="ml-4">
-        <Link href="/home">
-          <Image src={Logo} alt="Logo" width={30} height={30} layout="fixed" />
-        </Link>
-      </div>
-
-      <div className="flex">
-        <Link href="/cases">
-          <p className="mx-4 text-lg text-black no-underline hover:bg-slate-100">
-            Cases
-          </p>
-        </Link>
-        <Link href="/mystats">
-          <p className="mx-4 text-lg text-black no-underline">My Stats</p>
-        </Link>
-        <Link href="/about">
-          <p className="mx-4 text-lg text-black no-underline">About</p>
-        </Link>
-      </div>
-
-      <div className="mr-4">
-        <UserButton afterSignOutUrl="/welcome" />
-      </div>
-    </nav>
-  );
-};*/
-
-import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
-  const [activeItem, setActiveItem] = useState("/"); // Default active item is home page ('/')
-
+  const currentPath = usePathname();
   const navItems = [
     { name: "Cases", href: "/home" },
     { name: "Stats", href: "/stats" },
@@ -70,11 +35,10 @@ const Navbar = () => {
                 <Link href={item.href}>
                   <p
                     className={`font-large text-md rounded-md px-3 py-2 ${
-                      activeItem === item.href
+                      currentPath === item.href
                         ? "bg-blue-500 text-white"
                         : "text-gray-700 hover:bg-gray-100"
                     }`}
-                    onClick={() => setActiveItem(item.href)}
                   >
                     {item.name}
                   </p>
