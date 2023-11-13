@@ -3,6 +3,10 @@ import Header from "../_components/header";
 import CompletedCasesList from "./_components/completed_cases";
 import StatsDashboard from "./_components/stats_dashboard";
 
+export const Metadata = {
+  title: "Show your stats",
+};
+
 export default async function Stats() {
   const userCases = await api.case.getUserCases.query();
   return (
