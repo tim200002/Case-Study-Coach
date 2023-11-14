@@ -1,6 +1,7 @@
 import { caseRouter } from "~/server/api/routers/case";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { chatbotRouter } from "./routers/chatbot";
+import { analysisRouter } from "./routers/analysis";
 
 /**
  * This is the primary router for your server.
@@ -10,6 +11,7 @@ import { chatbotRouter } from "./routers/chatbot";
 export const appRouter = createTRPCRouter({
   case: caseRouter,
   chatbot: chatbotRouter,
+  analysis: analysisRouter,
 });
 
 // export type definition of API
