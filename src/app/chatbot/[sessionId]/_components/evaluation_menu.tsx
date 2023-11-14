@@ -1,21 +1,16 @@
 "use client";
 
 import { api } from "~/trpc/react";
-import Spinner from "~/app/_components/spinner";
 import { useSettingsStorage } from "~/store/settings_store";
 
-export const SpeedEvaluationSlider = (props: { value: number | null }) => {
-  if (props.value === null) {
-    return <div className="relative h-5 rounded-full bg-gray-200" />;
-  }
-
+export const SpeedEvaluationSlider = (props: { value: number }) => {
   // Assuming value ranges from -5 (too slow) to +5 (too fast), 0 being optimal
   const normalizedValue = (props.value + 5) * 10; // Convert to a scale of 0 to 100
 
   return (
-    <div className="relative flex h-5 items-center rounded-full bg-gray-200">
-      <div className="absolute left-0">Too slow</div>
-      <div className="absolute right-0">Too fast</div>
+    <div className="relative flex h-5  items-center rounded-full bg-gray-200">
+      <div className="absolute left-0 m-2">🐢</div>
+      <div className="absolute right-0 m-2">🐇</div>
       <div
         style={{ left: `${normalizedValue}%` }}
         className="transition-left absolute h-5 w-5 -translate-x-1/2 transform rounded-full bg-blue-500 duration-500 ease-in-out" // Slider handle
@@ -24,22 +19,19 @@ export const SpeedEvaluationSlider = (props: { value: number | null }) => {
   );
 };
 
-const EvaluationSlider = (props: { value: number | null }) => {
+const EvaluationSlider = (props: { value: number }) => {
+  console.log("Evaluation slider value: ", props.value);
   // Linearly interpolate between start and end based on t (0 <= t <= 1)
   const lerp = (start: number, end: number, t: number) => {
     return start + t * (end - start);
   };
-
-  // This should look like deactivate
-  if (props.value === null)
-    return <div className="relative h-5 rounded-full bg-gray-200" />;
 
   // Calculate the red and green components based on the value
   const red = Math.floor(lerp(255, 0, props.value / 10));
   const green = Math.floor(lerp(0, 255, props.value / 10));
 
   return (
-    <div className="relative h-5 rounded-full bg-gray-200">
+    <div className="relative h-5  rounded-full bg-gray-200">
       <div
         style={{
           width: `${props.value * 10}%`,
@@ -93,7 +85,7 @@ export const EvaluationComponent = (props: { sessionId: number }) => {
           );
         } else {
           return (
-            <div>
+            <div className="w-full">
               <div className="w-full">
                 <label className="mb-2 block text-sm font-bold text-gray-700">
                   Clarity:

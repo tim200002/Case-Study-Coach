@@ -1,20 +1,43 @@
 import { api } from "~/trpc/server";
 import Header from "../_components/header";
-import CompletedCasesList from "./_components/completed_cases";
 import StatsDashboard from "./_components/stats_dashboard";
+import CaseTile from "./_components/case_tile";
 
 export const Metadata = {
   title: "Show your stats",
 };
 
+const CompletedCaseList = (props: {
+  cases: { caseTitle: string; caseCompleted: boolean; sessionId: number }[];
+}) => {
+  const { cases } = props;
+  return (
+    <div className="flex min-h-screen flex-col items-center">
+      <div className="w-full max-w-6xl px-4 md:px-6 lg:px-8">
+        {cases.map((info) => {
+          return (
+            <CaseTile
+              key={info.sessionId}
+              title={info.caseTitle}
+              isCompleted={info.caseCompleted}
+              sessionId={info.sessionId}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 export default async function Stats() {
   const userCases = await api.case.getUserCases.query();
+
   return (
     <div>
       <Header />
       <div>
         <StatsDashboard userCases={userCases} />
-        <CompletedCasesList userCases={userCases} />
+        <CompletedCaseList cases={userCases} />
       </div>
     </div>
   );

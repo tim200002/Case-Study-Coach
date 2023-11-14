@@ -1,11 +1,13 @@
 export function getSpeechSpeedScore(scores: number[]) {
-  const score = exponentiallyWeightedMovingAverage(scores, 0.9);
+  const score = movingAverage(scores);
+
+  console.log("speed score", score);
 
   // Ideal speed is 150 wpm
-  const idealSpeed = 150;
+  const idealSpeed = 50;
   // Lower and upper bounds
-  const lowerBound = 90; // Too slow threshold
-  const upperBound = 200; // Too fast threshold
+  const lowerBound = 0; // Too slow threshold
+  const upperBound = 100; // Too fast threshold
 
   let normalizedScore;
 
@@ -29,10 +31,8 @@ export function getSpeechSpeedScore(scores: number[]) {
 }
 
 export function getClarityScore(scores: number[]) {
-  console.log("Clarity scores: ", scores);
-  const score = exponentiallyWeightedMovingAverage(scores, 0.9);
+  const score = movingAverage(scores);
 
-  console.log("Clarity score: ", score);
   const scoreNormalized = Math.round(score * 10);
   return scoreNormalized;
 }
@@ -45,4 +45,12 @@ function exponentiallyWeightedMovingAverage(scores: number[], alpha: number) {
     weight *= alpha;
   }
   return weightedSum;
+}
+
+function movingAverage(scores: number[]) {
+  let sum = 0;
+  for (const score of scores) {
+    sum += score;
+  }
+  return sum / scores.length;
 }

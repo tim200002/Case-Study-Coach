@@ -183,30 +183,6 @@ export const chatbotRouter = createTRPCRouter({
         speechClarity,
         speechSpeed,
       });
-
-      // fetch again and calculate new scores
-      const limit = 15;
-      const results = await db.query.conversationEvaluationComponents.findMany({
-        where: eq(
-          conversationEvaluationComponents.caseSessionId,
-          input.sessionId,
-        ),
-        orderBy: (component, { asc }) => [asc(component.createdAt)],
-        limit: limit,
-      });
-
-      // calculate scores
-      const averageSpeedScore = getSpeechSpeedScore(
-        results.map((r) => r.speechSpeed),
-      );
-      const averageClairyScore = getClarityScore(
-        results.map((r) => r.speechClarity),
-      );
-
-      return {
-        speedScore: averageSpeedScore,
-        clarityScore: averageClairyScore,
-      };
     }),
 
   getCurrentEvaluationScore: privateProcedure
@@ -222,8 +198,8 @@ export const chatbotRouter = createTRPCRouter({
         limit: limit,
       });
 
-      // make sure at least 5 evaluations are done, for score to be meaningful
-      if (results.length < 5) {
+      // make sure at least 3 evaluations are done, for score to be meaningful
+      if (results.length < 3) {
         return null;
       }
 

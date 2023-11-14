@@ -1,7 +1,9 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
 import { caseSessions, cases } from "~/server/db/schema";
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
 export const caseRouter = createTRPCRouter({
   getAll: privateProcedure.query(async () => {
@@ -39,6 +41,19 @@ export const caseRouter = createTRPCRouter({
 
     return caseList;
   }),
+
+  deleteUserCase: privateProcedure
+    .input(z.object({ sessionId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.userId;
+      const { sessionId } = input;
+
+      await db
+        .delete(caseSessions)
+        .where(
+          and(eq(caseSessions.id, sessionId), eq(caseSessions.userId, userId)),
+        );
+    }),
 
   // hello: publicProcedure
   //   .input(z.object({ text: z.string() }))
