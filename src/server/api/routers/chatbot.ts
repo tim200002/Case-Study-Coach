@@ -222,6 +222,11 @@ export const chatbotRouter = createTRPCRouter({
         limit: limit,
       });
 
+      // make sure at least 5 evaluations are done, for score to be meaningful
+      if (results.length < 5) {
+        return null;
+      }
+
       // calculate scores
       const averageSpeedScore = getSpeechSpeedScore(
         results.map((r) => r.speechSpeed),

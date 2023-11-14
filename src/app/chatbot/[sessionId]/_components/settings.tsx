@@ -56,6 +56,20 @@ export const InputModalityToggle = () => {
   );
 };
 
+export const VideoToggle = () => {
+  const settingsStore = useSettingsStorage();
+
+  return (
+    <Toggle
+      label="Video Analysis"
+      isActive={settingsStore.useVideo}
+      onChange={(isActive) => {
+        settingsStore.setUseVideo(isActive);
+      }}
+    />
+  );
+};
+
 export const SettingsButton = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
 

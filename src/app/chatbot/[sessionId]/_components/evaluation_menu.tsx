@@ -2,6 +2,7 @@
 
 import { api } from "~/trpc/react";
 import Spinner from "~/app/_components/spinner";
+import { useSettingsStorage } from "~/store/settings_store";
 
 export const SpeedEvaluationSlider = (props: { value: number | null }) => {
   if (props.value === null) {
@@ -58,27 +59,62 @@ export const EvaluationComponent = (props: { sessionId: number }) => {
     sessionId: props.sessionId,
   });
 
-  if (conversationEvaluationLoading) return <Spinner />;
+  const settingsStore = useSettingsStorage();
+  if (settingsStore.inputModality !== "Voice") {
+    return null;
+  }
+
+  const waitingForEnoughEvaluations = conversationEvaluationScore === null;
+
+  // Skeleton Loader Component
+  const EvaluationSkeleton = (props: { message: string }) => {
+    return (
+      <div className="h-full w-full space-y-4">
+        <div className="h-6 w-3/4 animate-pulse rounded-md bg-gray-200"></div>
+        <div className="h-6 w-1/2 animate-pulse rounded-md bg-gray-200"></div>
+        <div className="h-5 w-full animate-pulse rounded-full bg-gray-200"></div>
+        <p className="mt-2 text-sm font-semibold text-gray-500">
+          {props.message}
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div className="m-2 flex w-96 flex-col items-start space-y-4 rounded-md bg-white p-6 shadow-md">
       <h1 className="mb-4 text-xl font-bold">Live Evaluation</h1>
+      {(() => {
+        if (conversationEvaluationLoading) {
+          return <EvaluationSkeleton message="Please wait, fetching data..." />;
+        }
+        if (waitingForEnoughEvaluations) {
+          return (
+            <EvaluationSkeleton message="Please wait, gathering enough evaluations..." />
+          );
+        } else {
+          return (
+            <div>
+              <div className="w-full">
+                <label className="mb-2 block text-sm font-bold text-gray-700">
+                  Clarity:
+                </label>
+                <EvaluationSlider
+                  value={conversationEvaluationScore!.clarityScore}
+                />
+              </div>
 
-      <div className="w-full">
-        <label className="mb-2 block text-sm font-bold text-gray-700">
-          Clarity:
-        </label>
-        <EvaluationSlider value={conversationEvaluationScore!.clarityScore} />
-      </div>
-
-      <div className="w-full">
-        <label className="mb-2 block text-sm font-bold text-gray-700">
-          Speed:
-        </label>
-        <SpeedEvaluationSlider
-          value={conversationEvaluationScore!.speedScore}
-        />
-      </div>
+              <div className="w-full">
+                <label className="mb-2 block text-sm font-bold text-gray-700">
+                  Speed:
+                </label>
+                <SpeedEvaluationSlider
+                  value={conversationEvaluationScore!.speedScore}
+                />
+              </div>
+            </div>
+          );
+        }
+      })()}
     </div>
   );
 };

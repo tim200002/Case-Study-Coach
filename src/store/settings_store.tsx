@@ -15,6 +15,9 @@ interface SettingsStorageState {
 
   inputModality: supportedInputModalityType;
   setInputModality: (input_modality: supportedInputModalityType) => void;
+
+  useVideo: boolean;
+  setUseVideo: (use_video: boolean) => void;
 }
 
 export const useSettingsStorage = create<SettingsStorageState>()(
@@ -26,6 +29,10 @@ export const useSettingsStorage = create<SettingsStorageState>()(
       inputModality: "Voice",
       setInputModality: (input_modality: supportedInputModalityType) => {
         set({ inputModality: input_modality });
+      },
+      useVideo: true,
+      setUseVideo: (use_video: boolean) => {
+        set({ useVideo: use_video });
       },
     }),
     {

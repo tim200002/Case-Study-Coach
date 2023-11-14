@@ -2,6 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { api } from "~/trpc/react";
 import { TextModal } from "~/app/_components/modal";
+import { useSettingsStorage } from "~/store/settings_store";
+import HydrationZustand from "~/utils/hydration_zustand";
 
 enum Recording_State {
   INITIAL,
@@ -29,7 +31,14 @@ const VideoDeniedPopup = () => {
   );
 };
 
-export const Video = () => {
+const VideoSkeleton = () => {
+  // Assuming a common video aspect ratio of 16:9
+  return (
+    <div className="h-36 w-full animate-pulse rounded-md bg-gray-200"></div>
+  );
+};
+
+const VideoFeed = () => {
   const [state, setState] = useState(Recording_State.INITIAL);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { mutate, isLoading } = api.analysis.analyzeScreenshot.useMutation();
@@ -60,10 +69,10 @@ export const Video = () => {
           streamRef.current = await navigator.mediaDevices.getUserMedia({
             video: true,
           });
-          videoRef.current!.srcObject = streamRef.current;
         }
         clearTimeout(timeout);
         setState(Recording_State.RECORDING);
+        videoRef.current!.srcObject = streamRef.current;
 
         if (!intervalRef.current) {
           intervalRef.current = setInterval(async () => {
@@ -127,12 +136,36 @@ export const Video = () => {
     });
   };
   return (
-    <div>
+    <div className="h-full w-full">
       {state === Recording_State.REQUESTION_PERMISSION && (
         <RequestingVideoPermissionPopup />
       )}
       {state === Recording_State.PERMISSION_DENIED && <VideoDeniedPopup />}
-      <video ref={videoRef} autoPlay playsInline></video>;
+      {state !== Recording_State.RECORDING && <VideoSkeleton />}
+
+      <video
+        className={state === Recording_State.RECORDING ? "visible" : "hidden"}
+        ref={videoRef}
+        autoPlay
+        playsInline
+      ></video>
     </div>
+  );
+};
+
+export const VideoAnalysis = () => {
+  const settingsStore = useSettingsStorage();
+
+  if (!settingsStore.useVideo) {
+    return null;
+  }
+
+  return (
+    <HydrationZustand>
+      <div className="m-2 w-96 rounded-md bg-white p-6 shadow-md">
+        <h1 className="mb-4 text-xl font-bold">Your Video</h1>
+        <VideoFeed />
+      </div>
+    </HydrationZustand>
   );
 };

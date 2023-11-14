@@ -4,8 +4,12 @@ import { Metadata } from "next";
 import { CaseInfo } from "./_components/case_info";
 import { EvaluationComponent } from "./_components/evaluation_menu";
 import RealtimeChat from "./_components/realtime_chat";
-import { InputModalityToggle, SettingsButton } from "./_components/settings";
-import { Video } from "./_components/video";
+import {
+  InputModalityToggle,
+  SettingsButton,
+  VideoToggle,
+} from "./_components/settings";
+import { VideoAnalysis } from "./_components/video";
 
 export const metadata: Metadata = {
   title: "Solve the Case",
@@ -34,6 +38,7 @@ export default async function Page({
             <CaseInfo case={currentSession.case} />
             <div className="grow" />
             <InputModalityToggle />
+            <VideoToggle />
           </div>
           {currentSession.state === "RUNNING" && (
             <RealtimeChat
@@ -43,7 +48,8 @@ export default async function Page({
           )}
           <div className="flex w-1/3 flex-col items-end ">
             <EvaluationComponent sessionId={currentSession.id} />
-            <Video />
+            <VideoAnalysis />
+
             <div className="grow" />
             <SettingsButton />
           </div>
