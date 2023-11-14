@@ -5,6 +5,7 @@ import { CaseInfo } from "./_components/case_info";
 import { EvaluationComponent } from "./_components/evaluation_menu";
 import RealtimeChat from "./_components/realtime_chat";
 import { InputModalityToggle, SettingsButton } from "./_components/settings";
+import { Video } from "./_components/video";
 
 export const metadata: Metadata = {
   title: "Solve the Case",
@@ -42,6 +43,7 @@ export default async function Page({
           )}
           <div className="flex w-1/3 flex-col items-end ">
             <EvaluationComponent sessionId={currentSession.id} />
+            <Video />
             <div className="grow" />
             <SettingsButton />
           </div>
