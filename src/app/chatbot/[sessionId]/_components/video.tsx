@@ -38,7 +38,7 @@ const VideoSkeleton = () => {
   );
 };
 
-const VideoFeed = () => {
+const VideoFeed = (props: { sessionId: number }) => {
   const [state, setState] = useState(Recording_State.INITIAL);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { mutate, isLoading } = api.analysis.analyzeScreenshot.useMutation();
@@ -78,7 +78,7 @@ const VideoFeed = () => {
           intervalRef.current = setInterval(async () => {
             const screenshot = await captureScreenshot();
             const base64String = arrayBufferToBase64(screenshot);
-            mutate({ screenshot: base64String });
+            mutate({ screenshot: base64String, sessionId: props.sessionId });
           }, recordingIntervall);
         }
       } catch (error) {
@@ -153,7 +153,7 @@ const VideoFeed = () => {
   );
 };
 
-export const VideoAnalysis = () => {
+export const VideoAnalysis = (props: { sessionId: number }) => {
   const settingsStore = useSettingsStorage();
 
   if (!settingsStore.useVideo) {
@@ -164,7 +164,7 @@ export const VideoAnalysis = () => {
     <HydrationZustand>
       <div className="m-2 w-96 rounded-md bg-white p-6 shadow-md">
         <h1 className="mb-4 text-xl font-bold">Your Video</h1>
-        <VideoFeed />
+        <VideoFeed sessionId={props.sessionId} />
       </div>
     </HydrationZustand>
   );

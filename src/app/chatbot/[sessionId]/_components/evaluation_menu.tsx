@@ -47,7 +47,7 @@ export const EvaluationComponent = (props: { sessionId: number }) => {
   const {
     data: conversationEvaluationScore,
     isLoading: conversationEvaluationLoading,
-  } = api.chatbot.getCurrentEvaluationScore.useQuery({
+  } = api.analysis.getCurrentEvaluationScore.useQuery({
     sessionId: props.sessionId,
   });
 

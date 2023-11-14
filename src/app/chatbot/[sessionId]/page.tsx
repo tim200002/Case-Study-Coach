@@ -48,7 +48,7 @@ export default async function Page({
           )}
           <div className="flex w-1/3 flex-col items-end ">
             <EvaluationComponent sessionId={currentSession.id} />
-            <VideoAnalysis />
+            <VideoAnalysis sessionId={currentSession.id} />
 
             <div className="grow" />
             <SettingsButton />

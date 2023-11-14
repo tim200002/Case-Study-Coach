@@ -90,7 +90,7 @@ export class Statemachine {
     //! Normal case where user just responds to chatbot
     await this.addMessage(content, "CANDIDATE", false);
     const checkCompletionCommand =
-    this.currentSection.getCheckCompletionPrompt();
+      this.currentSection.getCheckCompletionPrompt();
 
     await this.addMessage(checkCompletionCommand, "COMMAND", true);
 

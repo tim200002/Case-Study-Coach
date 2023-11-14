@@ -133,6 +133,43 @@ export const conversationEvaluationComponentsRelationship = relations(
   }),
 );
 
+export const videoAnalysisEvaluationLevels = [
+  "UNKNOWN",
+  "VERY_UNLIKELY",
+  "UNLIKELY",
+  "POSSIBLE",
+  "LIKELY",
+  "VERY_LIKELY",
+] as const;
+
+export const videoAnalysisComponents = mysqlTable("video_analysis_components", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  caseSessionId: int("case_session_id").notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  angerLikelihood: mysqlEnum("anger_likelihood", videoAnalysisEvaluationLevels),
+  joyLikelihood: mysqlEnum("joy_likelihood", videoAnalysisEvaluationLevels),
+  surpriseLikelihood: mysqlEnum(
+    "surprise_likelihood",
+    videoAnalysisEvaluationLevels,
+  ),
+  sorrowLikelihood: mysqlEnum(
+    "sorrow_likelihood",
+    videoAnalysisEvaluationLevels,
+  ),
+});
+
+export const videoAnalysisComponentsRelationship = relations(
+  videoAnalysisComponents,
+  ({ one }) => ({
+    case: one(caseSessions, {
+      fields: [videoAnalysisComponents.caseSessionId],
+      references: [caseSessions.id],
+    }),
+  }),
+);
+
 export const CaseDifficultyLevels = ["EASY", "MEDIUM", "HARD"] as const;
 export const CaseSectorTypes = ["TECH", "FINANCE", "CONSULTING"] as const;
 export const CaseFunctionTypes = [

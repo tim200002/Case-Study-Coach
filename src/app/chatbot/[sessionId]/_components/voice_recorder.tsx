@@ -57,7 +57,7 @@ export const VoiceRecorderButton = (props: {
   );
 
   const queryClient = useQueryClient();
-  const { mutate } = api.chatbot.addConversationEvaluation.useMutation({
+  const { mutate } = api.analysis.addConversationEvaluation.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries();
     },
