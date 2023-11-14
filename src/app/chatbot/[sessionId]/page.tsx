@@ -1,7 +1,11 @@
 import Header from "~/app/_components/header";
 import { api } from "~/trpc/server";
-import { MainContent } from "./content";
 import { Metadata } from "next";
+import { CaseInfo } from "./_components/case_info";
+import { EvaluationComponent } from "./_components/evaluation_menu";
+import RealtimeChat from "./_components/realtime_chat";
+import { InputModalityToggle, SettingsButton } from "./_components/settings";
+import { Video } from "./_components/video";
 
 export const metadata: Metadata = {
   title: "Solve the Case",
@@ -25,11 +29,25 @@ export default async function Page({
     <>
       <main className="flex h-screen flex-col">
         <Header />
-        <MainContent
-          case={currentSession.case}
-          conversationHistory={currentSession.conversationComponents}
-          session={currentSession}
-        />
+        <div className="flex grow flex-row  overflow-auto">
+          <div className=" flex w-1/3 flex-col items-start">
+            <CaseInfo case={currentSession.case} />
+            <div className="grow" />
+            <InputModalityToggle />
+          </div>
+          {currentSession.state === "RUNNING" && (
+            <RealtimeChat
+              sessionId={currentSession.id}
+              initialConversation={currentSession.conversationComponents}
+            />
+          )}
+          <div className="flex w-1/3 flex-col items-end ">
+            <EvaluationComponent sessionId={currentSession.id} />
+            <Video />
+            <div className="grow" />
+            <SettingsButton />
+          </div>
+        </div>
       </main>
     </>
   );

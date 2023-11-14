@@ -1,26 +1,20 @@
-"use client";
-
-import Spinner from "~/app/_components/spinner";
-import { api } from "~/trpc/react";
-
-export default function StatsDashboard() {
-  const { data, isLoading } = api.case.getUserCases.useQuery();
-
-  if (isLoading) {
-    return <Spinner />;
-  }
-
-  const numCompletedCases = data!.filter((info) => info.caseCompleted).length;
+export default function StatsDashboard(props: {
+  userCases: { caseTitle: string; caseCompleted: boolean; sessionId: number }[];
+}) {
+  const { userCases } = props;
+  const numCompletedCases = userCases.filter(
+    (info) => info.caseCompleted,
+  ).length;
 
   return (
     // Place statstiles in a 4x4 grid
     <div>
       <div className="grid grid-cols-3 gap-4">
-        <StatsTile title="Total Cases" value={data!.length} />
+        <StatsTile title="Total Cases" value={userCases.length} />
         <StatsTile title="Completed Cases" value={numCompletedCases} />
         <StatsTile
           title="Cases in Progress"
-          value={data!.length - numCompletedCases}
+          value={userCases.length - numCompletedCases}
         />
       </div>
       <h1 className="my-4 mt-4 text-center text-4xl font-bold">
