@@ -7,12 +7,19 @@ import { useSettingsStorage } from "~/store/settings_store";
 
 export default function CaseTile(props: { caseData: Case }) {
   const { caseData } = props;
-  const { id, caseTitle, caseDescription, sector, difficulty } = caseData;
+  const {
+    id,
+    caseTitle,
+    caseDescription,
+    sector,
+    difficulty,
+    function: functionArea,
+  } = caseData;
   const router = useRouter();
 
   const type = "Interviewer-led"; // Replace with caseData.type
   const rating = 4.5; // Replace with caseData.rating
-  const functionArea = "Operations"; // Replace with caseData.functionArea
+
   const llmType = useSettingsStorage((state) => state.languageModel);
 
   const renderStars = () => {
@@ -36,15 +43,20 @@ export default function CaseTile(props: { caseData: Case }) {
     },
   });
 
+  const generateDescriptionString = () => {
+    let text = `${type}`;
+    if (difficulty) text = text.concat(` | Difficulty: ${difficulty}`);
+    if (functionArea) text = text.concat(` | Function: ${functionArea}`);
+    if (sector) text = text.concat(` | Sector: ${sector}`);
+    return text;
+  };
+
   return (
     <div className="m-2 flex flex-col rounded border p-6 shadow-md">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800">{caseTitle}</h3>
-          <p className="text-sm text-gray-500">
-            {type} | Difficulty: {difficulty} | Function: {functionArea} |
-            Sector: {sector}
-          </p>
+          <p className="text-sm text-gray-500">{generateDescriptionString()}</p>
           <p className="mt-2 text-gray-600">{caseDescription}</p>
         </div>
         <div className="flex items-center">
