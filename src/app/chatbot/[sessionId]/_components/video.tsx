@@ -38,10 +38,19 @@ const VideoSkeleton = () => {
   );
 };
 
-const VideoFeed = (props: { sessionId: number }) => {
+const VideoFeed = (props: {
+  sessionId: number;
+  onNewNotification: (notification: string) => void;
+}) => {
   const [state, setState] = useState(Recording_State.INITIAL);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const { mutate, isLoading } = api.analysis.analyzeScreenshot.useMutation();
+  const { mutate, isLoading } = api.analysis.analyzeScreenshot.useMutation({
+    onSuccess: (data) => {
+      if (data) {
+        props.onNewNotification(data);
+      }
+    },
+  });
   const recordingIntervall = 10000;
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -154,17 +163,48 @@ const VideoFeed = (props: { sessionId: number }) => {
 };
 
 export const VideoAnalysis = (props: { sessionId: number }) => {
+  const notificationTimeout = 5000;
   const settingsStore = useSettingsStorage();
+  const [notification, setNotification] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // conditionally render the video component
   if (!settingsStore.useVideo) {
     return null;
   }
+
+  const handleNotification = (notification: string) => {
+    setNotification(notification);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setNotification(null);
+    }, notificationTimeout);
+  };
+
+  // clean up timeout
+  // useEffect(() => {
+  //   return () => {
+  //     if (timeoutRef.current) {
+  //       clearTimeout(timeoutRef.current);
+  //     }
+  //   };
+  // }, []);
 
   return (
     <HydrationZustand>
       <div className="m-2 w-96 rounded-md bg-white p-6 shadow-md">
         <h1 className="mb-4 text-xl font-bold">Your Video</h1>
-        <VideoFeed sessionId={props.sessionId} />
+
+        <VideoFeed
+          sessionId={props.sessionId}
+          onNewNotification={handleNotification}
+        />
+
+        {notification && (
+          <div className="mt-4 rounded-md bg-gray-200 p-2">{notification}</div>
+        )}
       </div>
     </HydrationZustand>
   );

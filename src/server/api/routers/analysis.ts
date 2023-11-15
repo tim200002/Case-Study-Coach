@@ -23,60 +23,59 @@ export const analysisRouter = createTRPCRouter({
       const client = new ImageAnnotatorClient({
         keyFilename: "./google_key.json",
       });
-      try {
-        const buffer = Buffer.from(screenshot, "base64");
-        const [result] = await client.faceDetection(buffer);
-        const faces = result.faceAnnotations;
-        if (!faces || faces.length === 0) {
-          console.log("No faces detected");
-          return;
-        }
 
-        // Get the face data
-        const face = faces[0]!;
-        const angerLikelihood = face.angerLikelihood;
-        const joyLikelihood = face.joyLikelihood;
-        const surpriseLikelihood = face.surpriseLikelihood;
-        const sorrowLikelihood = face.sorrowLikelihood;
-
-        // Helper function to convert and validate the likelihood value
-        function convertLikelihood(
-          likelihood:
-            | google.cloud.vision.v1.Likelihood
-            | "UNKNOWN"
-            | "VERY_UNLIKELY"
-            | "UNLIKELY"
-            | "POSSIBLE"
-            | "LIKELY"
-            | "VERY_LIKELY"
-            | null
-            | undefined,
-        ) {
-          if (likelihood === null || likelihood === undefined) {
-            return "UNKNOWN";
-          }
-          switch (likelihood) {
-            case "VERY_UNLIKELY":
-            case "UNLIKELY":
-            case "POSSIBLE":
-            case "LIKELY":
-            case "VERY_LIKELY":
-              return likelihood;
-            default:
-              return "UNKNOWN";
-          }
-        }
-
-        await db.insert(videoAnalysisComponents).values({
-          caseSessionId: sessionId,
-          angerLikelihood: convertLikelihood(angerLikelihood),
-          joyLikelihood: convertLikelihood(joyLikelihood),
-          surpriseLikelihood: convertLikelihood(surpriseLikelihood),
-          sorrowLikelihood: convertLikelihood(sorrowLikelihood),
-        });
-      } catch (error) {
-        console.error("Error detecting faces:", error);
+      const buffer = Buffer.from(screenshot, "base64");
+      const [result] = await client.faceDetection(buffer);
+      const faces = result.faceAnnotations;
+      if (!faces || faces.length === 0) {
+        console.log("No faces detected");
+        return;
       }
+
+      // Get the face data
+      const face = faces[0]!;
+      const angerLikelihood = face.angerLikelihood;
+      const joyLikelihood = face.joyLikelihood;
+      const surpriseLikelihood = face.surpriseLikelihood;
+      const sorrowLikelihood = face.sorrowLikelihood;
+
+      // Helper function to convert and validate the likelihood value
+      function convertLikelihood(
+        likelihood:
+          | google.cloud.vision.v1.Likelihood
+          | "UNKNOWN"
+          | "VERY_UNLIKELY"
+          | "UNLIKELY"
+          | "POSSIBLE"
+          | "LIKELY"
+          | "VERY_LIKELY"
+          | null
+          | undefined,
+      ) {
+        if (likelihood === null || likelihood === undefined) {
+          return "UNKNOWN";
+        }
+        switch (likelihood) {
+          case "VERY_UNLIKELY":
+          case "UNLIKELY":
+          case "POSSIBLE":
+          case "LIKELY":
+          case "VERY_LIKELY":
+            return likelihood;
+          default:
+            return "UNKNOWN";
+        }
+      }
+
+      await db.insert(videoAnalysisComponents).values({
+        caseSessionId: sessionId,
+        angerLikelihood: convertLikelihood(angerLikelihood),
+        joyLikelihood: convertLikelihood(joyLikelihood),
+        surpriseLikelihood: convertLikelihood(surpriseLikelihood),
+        sorrowLikelihood: convertLikelihood(sorrowLikelihood),
+      });
+
+      return "You did not smile for a while. Please smile more!";
     }),
   addConversationEvaluation: privateProcedure
     .input(
@@ -111,8 +110,8 @@ export const analysisRouter = createTRPCRouter({
         limit: limit,
       });
 
-      // make sure at least 3 evaluations are done, for score to be meaningful
-      if (results.length < 3) {
+      // make sure at least 2 evaluations are done, for score to be meaningful
+      if (results.length < 2) {
         return null;
       }
 
