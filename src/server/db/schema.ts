@@ -160,6 +160,9 @@ export const videoAnalysisComponents = mysqlTable("video_analysis_components", {
   ),
 });
 
+export type VideoAnalysisComponent =
+  typeof videoAnalysisComponents.$inferSelect;
+
 export const videoAnalysisComponentsRelationship = relations(
   videoAnalysisComponents,
   ({ one }) => ({

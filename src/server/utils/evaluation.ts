@@ -1,3 +1,6 @@
+import { VertexAIWrapper } from "~/chatbot/llm/language_model";
+import { VideoAnalysisComponent } from "../db/schema";
+
 export function getSpeechSpeedScore(scores: number[]) {
   const score = movingAverage(scores);
 
@@ -53,4 +56,26 @@ function movingAverage(scores: number[]) {
     sum += score;
   }
   return sum / scores.length;
+}
+
+export async function analyzeFacialExpressions(
+  expressionHistory: VideoAnalysisComponent[],
+) {
+  const wrapper = new VertexAIWrapper();
+  const convertAnalysisComponentIntoString = (
+    component: VideoAnalysisComponent,
+  ) => {
+    return `Anger: ${component.angerLikelihood} Joy: ${component.joyLikelihood} Surprise: ${component.surpriseLikelihood} Sorrow: ${component.sorrowLikelihood}`;
+  };
+  const prompt = `We are in the situation of a job interview. With a camera I got pictures of a candidate and analyzed them for their mood over the last few seconds. Your job is to give the candidate actionable reccomendations to improve their performance. These recomendations will be shown to the candidate during the interview. One exaple is "You did not smile for quite some time, try to incorporate more smiling to appear more friendly". Provide exactly one action reccomendation as output to the candidate. The reccomendation should be short and brief
+
+Input (new to old):
+${expressionHistory
+  .map((e, i) => `${i + 1}: ${convertAnalysisComponentIntoString(e)}`)
+  .join("\n")}
+
+Action recommendation:
+`;
+
+  return await wrapper.predict(prompt);
 }

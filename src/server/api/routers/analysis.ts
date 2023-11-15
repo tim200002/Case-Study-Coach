@@ -11,6 +11,7 @@ import {
 import {
   getSpeechSpeedScore,
   getClarityScore,
+  analyzeFacialExpressions,
 } from "~/server/utils/evaluation";
 
 export const analysisRouter = createTRPCRouter({
@@ -75,7 +76,20 @@ export const analysisRouter = createTRPCRouter({
         sorrowLikelihood: convertLikelihood(sorrowLikelihood),
       });
 
-      return "You did not smile for a while. Please smile more!";
+      // receive the last evaluations
+      const limit = 10;
+      const results = await db.query.videoAnalysisComponents.findMany({
+        where: eq(videoAnalysisComponents.caseSessionId, sessionId),
+        orderBy: (component, { desc }) => [desc(component.createdAt)],
+        limit: limit,
+      });
+
+      if (results.length < 2) {
+        return null;
+      }
+
+      const recommendation = await analyzeFacialExpressions(results);
+      return recommendation;
     }),
   addConversationEvaluation: privateProcedure
     .input(
