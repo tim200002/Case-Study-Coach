@@ -60,6 +60,18 @@ export const caseRouter = createTRPCRouter({
         );
     }),
 
+  getEvaluation: privateProcedure
+    .input(z.object({ sessionId: z.number() }))
+    .query(async ({ input }) => {
+      const { sessionId } = input;
+
+      const evaluation = await db.query.caseSessions.findFirst({
+        where: eq(caseSessions.id, sessionId),
+      });
+
+      return evaluation;
+    }),
+
   // hello: publicProcedure
   //   .input(z.object({ text: z.string() }))
   //   .query(({ input }) => {

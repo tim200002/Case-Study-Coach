@@ -27,6 +27,20 @@ const CaseTile = (props: {
     },
   });
 
+  const EvaluationButton = () => {
+    if (!isCompleted) {
+      return null;
+    }
+
+    // Go to case evaluation page
+
+    return (
+      <button onClick={() => router.push(`/evaluation/${sessionId}`)}>
+        <IconTrash />
+      </button>
+    );
+  };
+
   const DeleteButton = () => {
     if (isLoading) {
       return <Spinner />;
@@ -53,6 +67,7 @@ const CaseTile = (props: {
           </p>
         </Link>
         <div className="w-2" />
+        <EvaluationButton />
         <DeleteButton />
       </div>
     </div>
