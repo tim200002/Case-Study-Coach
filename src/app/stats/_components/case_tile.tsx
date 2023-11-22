@@ -61,7 +61,7 @@ const CaseTile = (props: {
         Started on {new Date(createdAt).toLocaleDateString()}
       </p>
       <p className={textColor}>{textContent}</p>
-      <div className="mt-2 flex flex-row justify-between">
+      <div className="flex flex-row justify-end">
         <div className="mr-4">
           <EvaluationButton />
         </div>
