@@ -38,6 +38,35 @@ export class Parser {
     return parsedRoot;
   }
 
+  static parseCaseStateFromJsonFlat(json: any) {
+    function recursiveRunner(json: any) {
+      const children: CaseComponent[] = [];
+      for (const child of json.children) {
+        const jsonType: JSON_TYPES = child.jsonType;
+        switch (jsonType) {
+          case JSON_TYPES.CASE_COMPONENT:
+            children.push(CaseComponent.fromJson(child, null));
+            break;
+          case JSON_TYPES.CASE_STRUCTURE:
+            children.push(...recursiveRunner(child));
+            break;
+          default:
+            throw new Error("Unknown JSON Type");
+        }
+      }
+      return children;
+    }
+
+    const parsedCaseStructure = recursiveRunner(json);
+
+    // convert to dictionary for easy access by id
+    const caseComponentDict: { [key: string]: CaseComponent } = {};
+    for (const component of parsedCaseStructure) {
+      caseComponentDict[component.id] = component;
+    }
+    return caseComponentDict;
+  }
+
   static parseCaseTemplateToProperStateStructure(
     json: any,
   ): CaseStructureComponent {
