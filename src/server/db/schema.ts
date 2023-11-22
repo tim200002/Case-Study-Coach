@@ -38,6 +38,7 @@ export const caseSessions = mysqlTable("case_sessions", {
   ])
     .default("NOT_STARTED")
     .notNull(),
+  order: json("order"),
   createdAt: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
