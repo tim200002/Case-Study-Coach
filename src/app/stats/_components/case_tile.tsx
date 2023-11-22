@@ -33,10 +33,11 @@ const CaseTile = (props: {
     }
 
     // Go to case evaluation page
-
     return (
       <button onClick={() => router.push(`/evaluation/${sessionId}`)}>
-        <IconTrash />
+        <p className="rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
+          Evaluation
+        </p>
       </button>
     );
   };
@@ -52,6 +53,7 @@ const CaseTile = (props: {
       </button>
     );
   };
+
   return (
     <div className="m-2 flex flex-col rounded border p-6 shadow-md">
       <h1 className="text-l font-semibold">{title}</h1>
@@ -59,16 +61,20 @@ const CaseTile = (props: {
         Started on {new Date(createdAt).toLocaleDateString()}
       </p>
       <p className={textColor}>{textContent}</p>
-      <div className="flex flex-row">
-        <div className="grow" />
-        <Link href={`chatbot/${sessionId}`}>
-          <p className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
-            Go to Case
-          </p>
-        </Link>
-        <div className="w-2" />
-        <EvaluationButton />
-        <DeleteButton />
+      <div className="mt-2 flex flex-row justify-between">
+        <div className="mr-4">
+          <EvaluationButton />
+        </div>
+        <div className="flex flex-row">
+          <Link href={`chatbot/${sessionId}`}>
+            <p className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
+              Go to Case
+            </p>
+          </Link>
+          <div className="ml-4 mt-2">
+            <DeleteButton />
+          </div>
+        </div>
       </div>
     </div>
   );
