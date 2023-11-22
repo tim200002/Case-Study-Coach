@@ -36,8 +36,13 @@ export const caseRouter = createTRPCRouter({
         caseTitle: userCases[i]!.caseTitle,
         caseCompleted: userCaseSessions[i]!.state === "COMPLETED",
         sessionId: userCaseSessions[i]!.id,
+        createdAt: userCaseSessions[i]!.createdAt,
       });
     }
+
+    caseList.sort((a, b) => {
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
 
     return caseList;
   }),
