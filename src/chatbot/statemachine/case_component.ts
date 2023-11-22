@@ -146,7 +146,7 @@ export class CaseFrameworkComponent extends CaseComponentWithSolution {
     return new CaseFrameworkComponent(
       id ?? json.id,
       json.status,
-      json.solution,
+      getSolutionFromJson(json),
       json.additionalCommands,
       json.additionalInformation,
     );
@@ -188,7 +188,7 @@ export class CaseQuestionComponent extends CaseComponentWithSolution {
       id ?? json.id,
       json.status,
       json.question,
-      json.solution,
+      getSolutionFromJson(json),
       json.questionType,
       json.additionalCommands,
       json.additionalInformation,
@@ -219,9 +219,26 @@ export class CaseSynthesisComponent extends CaseComponentWithSolution {
     return new CaseSynthesisComponent(
       id ?? json.id,
       json.status,
-      json.solution,
+      getSolutionFromJson(json),
       json.additionalCommands,
       json.additionalInformation,
     );
+  }
+}
+
+function getSolutionFromJson(json: any) {
+  const referenceSolution = json.referenceSolution;
+  const solution = json.solution;
+
+  if (referenceSolution && solution) {
+    throw new Error("Both reference solution and solution are present");
+  }
+
+  if (referenceSolution) {
+    return referenceSolution;
+  } else if (solution) {
+    return solution;
+  } else {
+    throw new Error("No solution found");
   }
 }
