@@ -26,8 +26,12 @@ export interface LangchainWrapperInterface {
 
 export class OpenAIWrapper implements LangchainWrapperInterface {
   private llm: OpenAI;
-  constructor() {
-    this.llm = new OpenAI();
+  constructor(modelName: string | null = null) {
+    if (modelName) {
+      this.llm = new OpenAI({ modelName: modelName });
+    } else {
+      this.llm = new OpenAI();
+    }
   }
 
   async predict(prompt: string) {

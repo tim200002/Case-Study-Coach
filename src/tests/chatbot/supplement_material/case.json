@@ -46,7 +46,7 @@
             ],
             "referenceSolution": [
                 "Step 1: Calculate the potential patient population based on the total US population and the Alzheimer rate in the US population",
-                "Step 2: Calculate the actual patient populationby taking into account that not everyone will use our drug",
+                "Step 2: Calculate the actual patient population by taking into account that not everyone will use our drug",
                 "Step 3: Calculate the yearly infusion hours per patient by taking into account the frequency and length of the infusion",
                 "Step 4: Calculate the total infusion hours required by multiplying the number of patients with the yearly infusion hours per patient",
                 "Step 5: Calculate the shortfall in infusion capacity by subtracting the total infusion hours required from the free infusion capacity at the time of launch"

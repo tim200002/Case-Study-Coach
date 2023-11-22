@@ -15,26 +15,6 @@ export function prependTag(
   }
 }
 
-// export function stripTag(text: string): {
-//   tag: ConversationComponentType;
-//   content: string;
-// } {
-//   const pattern = /[A-Z]+: +/g;
-//   const matches = text.match(pattern);
-//   if (!matches) {
-//     throw new Error("No tag found in text: " + text);
-//   }
-//   if (matches.length > 1) {
-//     throw new Error("Multiple tags found");
-//   }
-
-//   const tag = matches[0].trim();
-//   const tagWithoutColon = tag.slice(0, -1) as ConversationComponentType;
-//   return {
-//     tag: tagWithoutColon,
-//     content: text.replace(tag, "").trim(),
-//   };
-// }
 export function splitTags(
   text: string,
 ): { tag: ConversationComponentType; content: string }[] {

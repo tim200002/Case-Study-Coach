@@ -1,7 +1,12 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export const supportedLanguageModels = ["OpenAI", "Vertex"] as const;
+export const supportedLanguageModels = [
+  "GPT-3",
+  "GPT-4",
+  "Davinci",
+  "Bard",
+] as const;
 export type supportedLanguageModelType =
   (typeof supportedLanguageModels)[number];
 
@@ -23,7 +28,7 @@ interface SettingsStorageState {
 export const useSettingsStorage = create<SettingsStorageState>()(
   persist(
     (set) => ({
-      languageModel: "Vertex",
+      languageModel: "Bard",
       selectLanguageModel: (language_model: supportedLanguageModelType) =>
         set({ languageModel: language_model }),
       inputModality: "Voice",
