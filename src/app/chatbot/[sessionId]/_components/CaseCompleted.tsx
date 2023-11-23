@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { evaluations } from "~/server/db/schema";
 
 const CaseCompleted = (props: { sessionId: number }) => {
   const { sessionId } = props;
