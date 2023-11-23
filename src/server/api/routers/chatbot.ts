@@ -129,14 +129,6 @@ export const chatbotRouter = createTRPCRouter({
 
       await chatbot.continueConversationAfterCandidateResponse(content);
 
-      // if case is completed update session
-      const isCaseCompleted = false;
-      if (isCaseCompleted) {
-        await db.update(caseSessions).set({
-          state: "COMPLETED",
-        });
-      }
-
       // get full conversation histroy back
       const conversationHistory =
         await db.query.conversationComponents.findMany({
@@ -146,6 +138,15 @@ export const chatbotRouter = createTRPCRouter({
           ),
           orderBy: (component, { asc }) => [asc(component.createdAt)],
         });
+
+      const isCaseCompleted =
+        (await db.query.caseSessions.findFirst({
+          where: (caseSessions, { eq }) =>
+            eq(caseSessions.userId, userId) && eq(caseSessions.id, sessionId),
+          with: {
+            case: true,
+          },
+        }))!.state === "COMPLETED";
 
       return {
         conversationHistory,

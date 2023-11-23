@@ -205,6 +205,9 @@ export const evaluations = mysqlTable("evaluations", {
   createdAt: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
+  state: mysqlEnum("state", ["CREATING_EVALUATION", "EVALUATED"])
+    .default("CREATING_EVALUATION")
+    .notNull(),
   overallScore: float("overall_score").notNull(),
   overallFeedback: text("overall_feedback").notNull(),
 });

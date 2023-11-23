@@ -40,12 +40,13 @@ export default async function Page({
             <InputModalityToggle />
             <VideoToggle />
           </div>
-          {currentSession.state === "RUNNING" && (
+          {
             <RealtimeChat
               sessionId={currentSession.id}
               initialConversation={currentSession.conversationComponents}
+              isCaseCompletedProp={currentSession.state === "COMPLETED"}
             />
-          )}
+          }
           <div className="flex w-1/3 flex-col items-end ">
             <EvaluationComponent sessionId={currentSession.id} />
             <VideoAnalysis sessionId={currentSession.id} />
