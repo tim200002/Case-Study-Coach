@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import Spinner from "~/app/_components/spinner";
 import { ConversationComponent } from "~/server/db/schema";
+import CaseCompleted from "./CaseCompleted";
 import { api } from "~/trpc/react";
 import { TextInput } from "./text_input";
 import { VoiceRecorderButton } from "./voice_recorder";
@@ -45,13 +46,15 @@ const ChatBubble = (props: { message: ConversationComponent | string }) => {
 export default function RealtimeChat(props: {
   sessionId: number;
   initialConversation: ConversationComponent[];
+  isCaseCompletedProp: boolean;
 }) {
-  const { sessionId, initialConversation } = props;
+  const { sessionId, initialConversation, isCaseCompletedProp } = props;
   const afterLastChatMessageRef = useRef<HTMLDivElement>(null);
   const [conversation, setConversation] =
     useState<(ConversationComponent | string)[]>(initialConversation);
   const [loading, setLoading] = useState(false);
   const settingsStore = useSettingsStorage();
+  const [isCaseCompleted, setIsCaseCompleted] = useState(isCaseCompletedProp);
 
   const { mutate } = api.chatbot.addResponse.useMutation({
     onMutate: (data) => {
@@ -64,6 +67,7 @@ export default function RealtimeChat(props: {
       const { conversationHistory, isCaseCompleted } = data;
       setLoading(false);
       setConversation(conversationHistory);
+      setIsCaseCompleted(isCaseCompleted);
       afterLastChatMessageRef.current?.scrollIntoView();
     },
     onError: (data) => {
@@ -91,21 +95,25 @@ export default function RealtimeChat(props: {
         ))}
         <div ref={afterLastChatMessageRef} />
       </ul>
-
       <div className="grow" />
 
       {loading && <Spinner />}
       <HydrationZustand>
-        {!loading && settingsStore.inputModality === "Text" && (
-          <TextInput onSendMessage={handleSendMessage} />
-        )}
-        {!loading && settingsStore.inputModality === "Voice" && (
-          <VoiceRecorderButton
-            onSendMessage={handleSendMessage}
-            sessionId={sessionId}
-          />
-        )}
+        {!isCaseCompleted &&
+          !loading &&
+          settingsStore.inputModality === "Text" && (
+            <TextInput onSendMessage={handleSendMessage} />
+          )}
+        {!isCaseCompleted &&
+          !loading &&
+          settingsStore.inputModality === "Voice" && (
+            <VoiceRecorderButton
+              onSendMessage={handleSendMessage}
+              sessionId={sessionId}
+            />
+          )}
       </HydrationZustand>
+      {!loading && isCaseCompleted && <CaseCompleted sessionId={sessionId} />}
     </div>
   );
 }
