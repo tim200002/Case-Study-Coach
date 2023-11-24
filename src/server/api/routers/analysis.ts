@@ -22,8 +22,10 @@ export const analysisRouter = createTRPCRouter({
       const { screenshot, sessionId } = input;
       console.log("Called analyze Screenshots");
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const keyFileParsed = JSON.parse(env.GOOGLE_VERTEX_AI_WEB_CREDENTIALS);
       const client = new ImageAnnotatorClient({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         credentials: keyFileParsed,
       });
 

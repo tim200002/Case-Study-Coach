@@ -1,6 +1,6 @@
 import Header from "~/app/_components/header";
 import { api } from "~/trpc/server";
-import { Metadata } from "next";
+import { type Metadata } from "next";
 import { CaseInfo } from "./_components/case_info";
 import { EvaluationComponent } from "./_components/evaluation_menu";
 import RealtimeChat from "./_components/realtime_chat";
