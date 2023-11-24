@@ -195,7 +195,7 @@ export class Statemachine {
     const conversationHistory = await this.getCurrentConversationHistory();
     const { parsedContent: didProvideIndication, rawResponse } =
       await this.llm.getBooleanResponse(conversationHistory);
-    this.addMessage(rawResponse.content, rawResponse.type, true);
+    await this.addMessage(rawResponse.content, rawResponse.type, true);
 
     if (!didProvideIndication) {
       await this.addMessage(
@@ -216,7 +216,7 @@ export class Statemachine {
   }
 
   private async transitionPhase2(content: string) {
-    this.addMessage(content, "CANDIDATE", false);
+    await this.addMessage(content, "CANDIDATE", false);
     await this.setSessionState("TRANSITION_PHASE_3");
     await this.transitionPhase3();
   }
@@ -431,7 +431,9 @@ export class Statemachine {
   private async addSectionToSectionHistory(sectionId: string) {
     console.log("Add section to section history ");
     // get section history
-    const sectionHistory = parseArrayFromJson<string>(this.session.order);
+    const sectionHistory = parseArrayFromJson<string>(
+      this.session.order as string,
+    );
     // check that section is not already in section history
     if (sectionHistory.includes(sectionId)) {
       throw new Error("Section already in section history");
@@ -439,7 +441,6 @@ export class Statemachine {
 
     // add section to section history
     sectionHistory.push(sectionId);
-    console.log("Section history: " + sectionHistory);
 
     // update section history
     await db
