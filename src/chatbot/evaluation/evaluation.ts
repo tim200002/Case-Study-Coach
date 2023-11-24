@@ -3,7 +3,7 @@ import { db } from "~/server/db";
 import { Parser } from "../statemachine/parser";
 import { parseArrayFromJson } from "../utils/parseArray";
 import { or } from "drizzle-orm";
-import { CaseComponent } from "../statemachine/case_component";
+import { type CaseComponent } from "../statemachine/case_component";
 
 async function evaluateCase(sessionId: number, userId: string) {
   const session = await db.query.caseSessions.findFirst({
@@ -16,7 +16,7 @@ async function evaluateCase(sessionId: number, userId: string) {
   }
 
   const caseParsed = Parser.parseCaseStateFromJsonFlat(session.liveStructure);
-  const caseHistory = parseArrayFromJson<string>(session.order);
+  const caseHistory = parseArrayFromJson<string>(session.order as string);
   // sequentially do the evaluation of all sections
   for (const sectionId of caseHistory) {
     const section = caseParsed[sectionId]; // This is the reference section with solution and stuff

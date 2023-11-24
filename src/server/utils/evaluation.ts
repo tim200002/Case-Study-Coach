@@ -1,5 +1,5 @@
 import { VertexAIWrapper } from "~/chatbot/llm/language_model";
-import { VideoAnalysisComponent } from "../db/schema";
+import { type VideoAnalysisComponent } from "../db/schema";
 
 export function getSpeechSpeedScore(scores: number[]) {
   const score = movingAverage(scores);
