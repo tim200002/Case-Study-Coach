@@ -1,8 +1,5 @@
 import { env } from "~/env.mjs";
 import { Socket, io } from "socket.io-client";
-import { Clerk, getAuth } from "@clerk/nextjs/dist/types/server";
-import { auth } from "@clerk/nextjs";
-
 const RECORDING_RATE = 500;
 
 type TranscriptResponseNonFinal = {
