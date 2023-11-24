@@ -24,6 +24,7 @@ import {
   getInitialPrimer,
   thankCandidateOnCaseEndingPrompt,
 } from "../conversation_templates/special_prompts";
+import { parseArrayFromJson } from "../utils/parseArray";
 
 export class Statemachine {
   case: Case;
@@ -57,6 +58,8 @@ export class Statemachine {
         "Invalid Database State. First component is not an introduction",
       );
     }
+
+    await this.addSectionToSectionHistory(introduction.id);
 
     introduction.status = Case_Component_Status.RUNNING; // Does this update the underlying real object?
 
@@ -147,6 +150,7 @@ export class Statemachine {
   }
 
   private async introduceCurrentSection() {
+    await this.addSectionToSectionHistory(this.currentSection.id);
     this.addMessage(
       this.currentSection.getIntroductionPrompt(),
       "COMMAND",
@@ -422,5 +426,27 @@ export class Statemachine {
       .where(eq(caseSessions.id, this.session.id));
 
     return nextState;
+  }
+
+  private async addSectionToSectionHistory(sectionId: string) {
+    console.log("Add section to section history ");
+    // get section history
+    const sectionHistory = parseArrayFromJson<string>(this.session.order);
+    // check that section is not already in section history
+    if (sectionHistory.includes(sectionId)) {
+      throw new Error("Section already in section history");
+    }
+
+    // add section to section history
+    sectionHistory.push(sectionId);
+    console.log("Section history: " + sectionHistory);
+
+    // update section history
+    await db
+      .update(caseSessions)
+      .set({
+        order: JSON.stringify(sectionHistory),
+      })
+      .where(eq(caseSessions.id, this.session.id));
   }
 }

@@ -38,6 +38,7 @@ export const caseSessions = mysqlTable("case_sessions", {
   ])
     .default("NOT_STARTED")
     .notNull(),
+  order: json("order"),
   createdAt: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -197,3 +198,41 @@ export const cases = mysqlTable("cases", {
 });
 
 export type Case = typeof cases.$inferSelect;
+
+export const evaluations = mysqlTable("evaluations", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  caseSessionId: int("case_session_id").notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  overallScore: float("overall_score").notNull(),
+  overallFeedback: text("overall_feedback").notNull(),
+});
+
+export const evaluationsRelationship = relations(evaluations, ({ one }) => ({
+  case: one(caseSessions, {
+    fields: [evaluations.caseSessionId],
+    references: [caseSessions.id],
+  }),
+}));
+
+export const evaluationComponents = mysqlTable("evaluation_components", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  evaluationId: int("evaluation_id").notNull(),
+  sectionId: varchar("section_id", { length: 128 }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  score: float("score").notNull(),
+  feedback: text("feedback").notNull(),
+});
+
+export const evaluationComponentsRelationship = relations(
+  evaluationComponents,
+  ({ one }) => ({
+    evaluation: one(evaluations, {
+      fields: [evaluationComponents.evaluationId],
+      references: [evaluations.id],
+    }),
+  }),
+);

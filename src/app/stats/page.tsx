@@ -8,7 +8,12 @@ export const Metadata = {
 };
 
 const CompletedCaseList = (props: {
-  cases: { caseTitle: string; caseCompleted: boolean; sessionId: number }[];
+  cases: {
+    caseTitle: string;
+    caseCompleted: boolean;
+    sessionId: number;
+    createdAt: Date;
+  }[];
 }) => {
   const { cases } = props;
   return (
@@ -21,6 +26,7 @@ const CompletedCaseList = (props: {
               title={info.caseTitle}
               isCompleted={info.caseCompleted}
               sessionId={info.sessionId}
+              createdAt={info.createdAt}
             />
           );
         })}

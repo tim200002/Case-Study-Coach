@@ -12,8 +12,11 @@ const CaseTile = (props: {
   title: string;
   isCompleted: boolean;
   sessionId: number;
+  createdAt: Date;
 }) => {
-  const { title, isCompleted, sessionId } = props;
+  const { title, isCompleted, sessionId, createdAt } = props;
+
+  console.log("CreatedAt", createdAt);
 
   const textContent = isCompleted ? "Completed" : "In Progress";
   const textColor = isCompleted ? "text-green-500" : "text-yellow-500";
@@ -23,6 +26,21 @@ const CaseTile = (props: {
       router.refresh();
     },
   });
+
+  const EvaluationButton = () => {
+    if (!isCompleted) {
+      return null;
+    }
+
+    // Go to case evaluation page
+    return (
+      <button onClick={() => router.push(`/evaluation/${sessionId}`)}>
+        <p className="rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
+          Evaluation
+        </p>
+      </button>
+    );
+  };
 
   const DeleteButton = () => {
     if (isLoading) {
@@ -35,19 +53,28 @@ const CaseTile = (props: {
       </button>
     );
   };
+
   return (
     <div className="m-2 flex flex-col rounded border p-6 shadow-md">
       <h1 className="text-l font-semibold">{title}</h1>
+      <p className="text-sm text-gray-500">
+        Started on {new Date(createdAt).toLocaleDateString()}
+      </p>
       <p className={textColor}>{textContent}</p>
-      <div className="flex flex-row">
-        <div className="grow" />
-        <Link href={`chatbot/${sessionId}`}>
-          <p className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
-            Go to Case
-          </p>
-        </Link>
-        <div className="w-2" />
-        <DeleteButton />
+      <div className="flex flex-row justify-end">
+        <div className="mr-4">
+          <EvaluationButton />
+        </div>
+        <div className="flex flex-row">
+          <Link href={`chatbot/${sessionId}`}>
+            <p className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
+              Go to Case
+            </p>
+          </Link>
+          <div className="ml-4 mt-2">
+            <DeleteButton />
+          </div>
+        </div>
       </div>
     </div>
   );
