@@ -3,7 +3,6 @@ import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
 import { caseSessions, cases } from "~/server/db/schema";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
 
 export const caseRouter = createTRPCRouter({
   getAll: privateProcedure.query(async () => {

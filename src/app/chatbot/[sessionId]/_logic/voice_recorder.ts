@@ -1,5 +1,7 @@
 import { env } from "~/env.mjs";
 import { Socket, io } from "socket.io-client";
+import { Clerk, getAuth } from "@clerk/nextjs/dist/types/server";
+import { auth } from "@clerk/nextjs";
 
 const RECORDING_RATE = 500;
 
@@ -29,10 +31,15 @@ export class VoiceRecorder {
   private recorder: MediaRecorder | null = null;
   private socket: Socket | null = null;
   private transcriptHistory: TranscriptResponse[] = [];
+  private getToken: () => Promise<string | null>;
 
   public onTranscriptChange: (transcripts: TranscriptResponse[]) => void;
 
-  constructor(onTranscriptChange: (transcripts: TranscriptResponse[]) => void) {
+  constructor(
+    getToken: () => Promise<string | null>,
+    onTranscriptChange: (transcripts: TranscriptResponse[]) => void,
+  ) {
+    this.getToken = getToken;
     this.onTranscriptChange = onTranscriptChange;
   }
 
@@ -63,7 +70,7 @@ export class VoiceRecorder {
     }
   }
 
-  private setupSocket(): void {
+  private async setupSocket(): Promise<void> {
     if (this.socket) {
       this.socket.disconnect();
       console.log(
@@ -71,7 +78,16 @@ export class VoiceRecorder {
       );
     }
 
-    this.socket = io(env.NEXT_PUBLIC_TRANSCRIPTION_SERVER_URL);
+    const token = await this.getToken();
+    if (!token) {
+      throw new Error("Token is null");
+    }
+
+    this.socket = io(env.NEXT_PUBLIC_TRANSCRIPTION_SERVER_URL, {
+      auth: {
+        token,
+      },
+    });
     this.socket.on("connect", () => {
       console.log("Socket connected");
     });
@@ -95,6 +111,10 @@ export class VoiceRecorder {
     this.socket.on("disconnect", () => {
       console.log("Socket disconnected");
     });
+
+    this.socket.on("connect_error", (err) => {
+      throw new Error("Socket connection error: " + err);
+    });
   }
 
   async startRecording(): Promise<boolean> {
@@ -112,7 +132,7 @@ export class VoiceRecorder {
     console.log("Finished setting up recording devices");
 
     console.log("Setting up socket");
-    this.setupSocket();
+    await this.setupSocket();
     console.log("Finished setting up socket");
 
     console.log("Starting recording");
