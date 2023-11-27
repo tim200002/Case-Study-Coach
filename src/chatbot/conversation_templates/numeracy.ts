@@ -17,6 +17,7 @@ ${this.caseComponent.question}
 
 Additional information you should provide the candidate when they ask for it is:
 ${this.caseComponent.additionalInformation}
+Never provide additional information that is not asked for, and never do any math for the candidate.
 
 A reference solution of steps to solve the question is the following:
 ${this.caseComponent.solution}
