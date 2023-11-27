@@ -8,6 +8,7 @@ import { TextInput } from "./text_input";
 import { VoiceRecorderButton } from "./voice_recorder";
 import { useSettingsStorage } from "~/store/settings_store";
 import HydrationZustand from "~/utils/hydration_zustand";
+import { Modal } from "~/app/_components/modal";
 
 const ChatBubble = (props: { message: ConversationComponent | string }) => {
   const { message } = props;
@@ -37,6 +38,42 @@ const ChatBubble = (props: { message: ConversationComponent | string }) => {
         }`}
       >
         <div className="break-words text-base">{messageContent}</div>
+      </div>
+    </div>
+  );
+};
+
+const ChatBubbleWithMedia = (props: { link: string; type: "IMAGE" }) => {
+  const { link, type } = props;
+
+  switch (type) {
+    case "IMAGE":
+      return <ImageBubble link={link} />;
+    default:
+      return null;
+  }
+};
+
+const ImageBubble = (props: { link: string }) => {
+  const { link } = props;
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleDialogClose = () => setIsDialogOpen(false);
+  const handleDialogOpen = () => setIsDialogOpen(true);
+
+  return (
+    <div>
+      {isDialogOpen && (
+        <Modal title="Image" onClose={handleDialogClose}>
+          <img src={link} />
+        </Modal>
+      )}
+
+      <div className="col-span-2 col-start-1 max-w-full space-y-2 place-self-start">
+        <div className="rounded-2xl rounded-tl-none bg-red-300 p-5">
+          <button onClick={handleDialogOpen}>View Image</button>
+        </div>
       </div>
     </div>
   );
@@ -80,15 +117,57 @@ export default function RealtimeChat(props: {
     });
   };
 
+  const convertMessageToChatBubble = (
+    message: string | ConversationComponent,
+  ) => {
+    if (typeof message === "string") {
+      return <ChatBubble message={message} key={message} />;
+    }
+
+    const { component: messageParsed, url } = parseImage(message);
+    if (!url) {
+      return <ChatBubble message={messageParsed} key={messageParsed.id} />;
+    }
+
+    return (
+      <div className="flex flex-col gap-2">
+        <ChatBubble message={messageParsed} key={messageParsed.id} />
+        <ChatBubbleWithMedia link={url} type="IMAGE" />
+      </div>
+    );
+  };
+
+  const parseImage = (
+    component: ConversationComponent,
+  ): { component: ConversationComponent; url?: string } => {
+    // Regular expression to match the <image> tag and extract the URL
+    const imageTagRegex = /<image>([^<]+)<\/image>/;
+
+    // Check if the message contains an <image> tag
+    const match = component.content.match(imageTagRegex);
+
+    if (!match) {
+      return { component: component };
+    }
+
+    const componentCopy = structuredClone(component);
+    // Extract the URL from the <image> tag
+    const url = match[1];
+
+    // Replace the <image> tag with the string "image"
+    componentCopy.content = componentCopy.content.replace(
+      imageTagRegex,
+      "image",
+    );
+
+    return { component: componentCopy, url };
+  };
+
   return (
     <div className="flex max-h-full w-full flex-col items-center p-2">
       <ul className="grid grid-cols-3 space-y-5 overflow-scroll">
-        {conversation.map((message) => (
-          <ChatBubble
-            key={typeof message === "string" ? null : message.id}
-            message={message}
-          />
-        ))}
+        {conversation.map(convertMessageToChatBubble)}
+
         <div ref={afterLastChatMessageRef} />
       </ul>
 
