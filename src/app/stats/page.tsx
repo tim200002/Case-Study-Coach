@@ -2,8 +2,9 @@ import { api } from "~/trpc/server";
 import Header from "../_components/header";
 import StatsDashboard from "./_components/stats_dashboard";
 import CaseTile from "./_components/case_tile";
+import { Metadata } from "next";
 
-export const Metadata = {
+export const metadata: Metadata = {
   title: "Show your stats",
 };
 

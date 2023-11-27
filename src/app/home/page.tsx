@@ -5,8 +5,9 @@ import { db } from "~/server/db";
 import { Case, cases } from "~/server/db/schema";
 import { z } from "zod";
 import CaseTile from "./_components/case_tile";
+import { Metadata } from "next";
 
-export const Metadata = {
+export const metadata: Metadata = {
   title: "Welcome to Cacey",
 };
 

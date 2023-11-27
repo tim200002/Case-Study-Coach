@@ -5,8 +5,9 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import { Metadata } from "next";
 
-export const Metadata = {
+export const metadata: Metadata = {
   title: "Welcome to Cacey",
 };
 

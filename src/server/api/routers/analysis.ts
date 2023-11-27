@@ -1,6 +1,7 @@
 import { ImageAnnotatorClient } from "@google-cloud/vision";
 import { google } from "@google-cloud/vision/build/protos/protos";
 import { eq } from "drizzle-orm";
+import { env } from "~/env.mjs";
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
@@ -21,8 +22,11 @@ export const analysisRouter = createTRPCRouter({
       const { screenshot, sessionId } = input;
       console.log("Called analyze Screenshots");
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const keyFileParsed = JSON.parse(env.GOOGLE_VERTEX_AI_WEB_CREDENTIALS);
       const client = new ImageAnnotatorClient({
-        keyFilename: "./google_key.json",
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        credentials: keyFileParsed,
       });
 
       const buffer = Buffer.from(screenshot, "base64");

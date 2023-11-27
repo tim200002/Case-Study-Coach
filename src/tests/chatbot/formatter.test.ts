@@ -1,4 +1,4 @@
-import { expect, test } from "@jest/globals";
+import { test } from "@jest/globals";
 import { splitTags } from "~/chatbot/utils/formatters";
 
 test("Tag splitting test", () => {

@@ -1,6 +1,7 @@
-import Header from "../_components/header";
+import Header from "~/app/_components/header";
+import { Metadata } from "next";
 
-export const Metadata = {
+export const metadata: Metadata = {
   title: "About",
 };
 

@@ -14,6 +14,7 @@ export const env = createEnv({
         (str) => !str.includes("YOUR_MYSQL_URL_HERE"),
         "You forgot to change the default URL",
       ),
+    GOOGLE_VERTEX_AI_WEB_CREDENTIALS: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -39,6 +40,8 @@ export const env = createEnv({
     NEXT_PUBLIC_TRANSCRIPTION_SERVER_URL:
       process.env.NEXT_PUBLIC_TRANSCRIPTION_SERVER_URL,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+    GOOGLE_VERTEX_AI_WEB_CREDENTIALS:
+      process.env.GOOGLE_VERTEX_AI_WEB_CREDENTIALS,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

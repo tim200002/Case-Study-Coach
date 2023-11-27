@@ -1,8 +1,9 @@
+import { Metadata } from "next";
 import Header from "../../_components/header";
 import { api } from "~/trpc/server";
 import { evaluations } from "~/server/db/schema";
 
-export const Metadata = {
+export const metadata: Metadata = {
   title: "Evaluation",
 };
 

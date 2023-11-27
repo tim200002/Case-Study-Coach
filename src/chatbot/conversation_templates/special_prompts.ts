@@ -1,4 +1,4 @@
-import { CaseComponent } from "../statemachine/case_component";
+import { type CaseComponent } from "../statemachine/case_component";
 import { prependTag } from "../utils/formatters";
 
 export function getInitialPrimer(

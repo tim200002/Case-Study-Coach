@@ -8,6 +8,7 @@ import {
 import { TextModal } from "~/app/_components/modal";
 import { api } from "~/trpc/react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@clerk/nextjs";
 
 enum Recording_State {
   NOT_STARTED,
@@ -51,6 +52,7 @@ export const VoiceRecorderButton = (props: {
   sessionId: number;
 }) => {
   const [transcript, setTranscript] = useState("");
+  const { getToken } = useAuth();
 
   const [recordingState, setRecordingState] = useState(
     Recording_State.NOT_STARTED,
@@ -85,7 +87,7 @@ export const VoiceRecorderButton = (props: {
     }
   };
 
-  const voiceRecoderRef = useRef(new VoiceRecorder(onNewTranscript));
+  const voiceRecoderRef = useRef(new VoiceRecorder(getToken, onNewTranscript));
   const handleMicrophoneClick = () => {
     // Start recording
     if (
