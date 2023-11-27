@@ -123,8 +123,9 @@ export class Statemachine {
   }
 
   private async initTransitionPhase() {
-    if (this.nextPossibleStates.length === 0) {
+    if (!this.nextPossibleStates || this.nextPossibleStates.length === 0) {
       // close case
+      console.log("Closing case");
       await this.closeCase();
     }
     // Advance to framework
@@ -167,14 +168,14 @@ export class Statemachine {
   }
 
   private async closeCase() {
-    this.currentSection.status = Case_Component_Status.COMPLETED;
     // One last message to candidate
-    await this.addMessage(thankCandidateOnCaseEndingPrompt(), "COMMAND", true);
+    await this.addMessage(
+      thankCandidateOnCaseEndingPrompt(),
+      "INTERVIEWER",
+      true,
+    );
 
-    const conversationHistory = await this.getCurrentConversationHistory();
-    const { parsedContent } =
-      await this.llm.getInterviewerResponse(conversationHistory);
-    await this.addMessage(parsedContent.content, parsedContent.type, false);
+    this.currentSection.status = Case_Component_Status.COMPLETED;
 
     await db
       .update(caseSessions)

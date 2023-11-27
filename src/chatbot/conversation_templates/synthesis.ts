@@ -4,6 +4,7 @@ import {
   CaseQuestionComponent,
   CaseSynthesisComponent,
 } from "../statemachine/case_component";
+import { prependTag } from "../utils/formatters";
 import ConversationTemplateInterface from "./conversation_template_interface";
 
 export class SynthesisTemplate implements ConversationTemplateInterface {
@@ -23,15 +24,15 @@ Start this section by asking the candidate to make a recommendation to the clien
   getCheckCompletionPrompt(): string {
     const completionPrompt = `Make sure that the candidate not only provides a recommendation but also supports their recommendation.
 
-Respond with "${prependTag(
-      "True",
-      "SYSTEM",
-      true,
-    )}" if this section is completed, otherwise respond with "${prependTag(
-      "False",
-      "SYSTEM",
-      true,
-    )}".`;
+  Respond with "${prependTag(
+    "True",
+    "SYSTEM",
+    true,
+  )}" if this section is completed, otherwise respond with "${prependTag(
+    "False",
+    "SYSTEM",
+    true,
+  )}".`;
 
     return completionPrompt;
   }

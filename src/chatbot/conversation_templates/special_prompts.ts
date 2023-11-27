@@ -74,5 +74,5 @@ export function compareResponsesWhereToContinuePrompt(
 }
 
 export function thankCandidateOnCaseEndingPrompt() {
-  return `The case is now finished. Thank the candidate for his participation.`;
+  return `Thank you for your recommendation. This concludes the case interview. You are able to get feedback on your performance by clicking on the \"Evaluation\" button.`;
 }

@@ -43,7 +43,7 @@ export class ChatOutputValidator
   repromt(): ExtendedContext {
     return {
       type: "COMMAND",
-      content: `Do it again, but this time your response should be started with only of of the tags from the list [${this.allowedTags}]. It must also not continue after this tag.`,
+      content: `Do it again, but this time your response should be started with only of the tags from the list [${this.allowedTags}]. It must also not continue after this tag.`,
     };
   }
 }

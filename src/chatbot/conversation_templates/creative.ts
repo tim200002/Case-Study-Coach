@@ -3,6 +3,7 @@ import {
   CaseIntroductionComponent,
   CaseQuestionComponent,
 } from "../statemachine/case_component";
+import { prependTag } from "../utils/formatters";
 import ConversationTemplateInterface from "./conversation_template_interface";
 
 export class CreativeTemplate implements ConversationTemplateInterface {
@@ -12,7 +13,7 @@ export class CreativeTemplate implements ConversationTemplateInterface {
   }
 
   getIntroductionPrompt(): string {
-    return `We are now at the start of one question of the case. This is a creative question and involves the candidate brainstorming and thinking a bit outside the box. The question to for the candidate to answer is the following:
+    return `We are now at the start of one question of the case. This is a creative question and involves the candidate brainstorming. The question to for the candidate to answer is the following:
   ${this.caseComponent.question}
   
   Additional information you should provide the candidate when they ask for it is:
@@ -32,8 +33,18 @@ export class CreativeTemplate implements ConversationTemplateInterface {
   getCheckCompletionPrompt(): string {
     const completionPrompt = `Take the previous response of the candidate to evaluate if this part of the case study is completed. To evaluate if the question is completed use the following criteria:
   - Check if the candidate approach is right and if it guides us towards the goal, else help him to get on the right track
-  - Check if the candidate got to the complete result, only after that continue the case
-  - Be very critical and do not let the candidate leave before this section is completed`;
+  - Check if the candidate got to the complete result and went through all the necessary steps, only after that continue the case
+  - Be very critical and do not let the candidate leave before this section is completed
+
+    Respond with "${prependTag(
+      "True",
+      "SYSTEM",
+      true,
+    )}" if this section is completed, otherwise respond with "${prependTag(
+      "False",
+      "SYSTEM",
+      true,
+    )}".`;
     return completionPrompt;
   }
 }
