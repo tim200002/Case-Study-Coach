@@ -1,7 +1,12 @@
 import { and, eq } from "drizzle-orm";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
-import { caseSessions, cases, evaluations } from "~/server/db/schema";
+import {
+  caseSessions,
+  cases,
+  evaluationComponents,
+  evaluations,
+} from "~/server/db/schema";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { evaluateCase } from "~/chatbot/evaluation/evaluation";
@@ -79,6 +84,18 @@ export const caseRouter = createTRPCRouter({
       const evaluationId = await evaluateCase(input.sessionId);
 
       return evaluationId;
+    }),
+
+  getEvaluationComponents: privateProcedure
+    .input(z.object({ evaluationId: z.number() }))
+    .query(async ({ input }) => {
+      const { evaluationId } = input;
+
+      const components = await db.query.evaluationComponents.findMany({
+        where: eq(evaluationComponents.evaluationId, evaluationId),
+      });
+
+      return components;
     }),
 
   // hello: publicProcedure

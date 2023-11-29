@@ -1,13 +1,25 @@
 import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";
-import { Parser } from "../statemachine/parser";
-import { parseArrayFromJson } from "../utils/parseArray";
+
+import {
+  parseArrayFromJson,
+  parseCaseStateFromJsonFlat,
+} from "../utils/parseArray";
+
 import { or } from "drizzle-orm";
-import { CaseComponent } from "../statemachine/case_component";
+import { type CaseComponent } from "../statemachine/case_component";
 import { prependTag } from "../utils/formatters";
 import { VertexAIWrapper } from "../llm/language_model";
 import { evaluations } from "~/server/db/schema";
 import { evaluationComponents } from "~/server/db/schema";
+import evaluationTemplateFactory from "./evaluation_templates/evaluation_factory";
+
+type EvaluationComponentObject = {
+  sectionId: string;
+  score: number;
+  feedback: string;
+  conversationString: string;
+};
 
 async function evaluateCase(sessionId: number) {
   const session = await db.query.caseSessions.findFirst({
@@ -18,10 +30,15 @@ async function evaluateCase(sessionId: number) {
     throw new TRPCError({ code: "NOT_FOUND" });
   }
 
-  const sectionEvaluations = [];
+  const sectionEvaluations: EvaluationComponentObject[] = [];
 
-  const caseParsed = Parser.parseCaseStateFromJsonFlat(session.liveStructure);
-  /*const caseHistory = parseArrayFromJson<string>(session.order);
+  // Convert session.liveStructure to JSON
+  const caseParsed = parseCaseStateFromJsonFlat(
+    JSON.parse(session.liveStructure as string),
+  );
+
+  const caseHistory = parseArrayFromJson<string>(session.order as string);
+
   // sequentially do the evaluation of all sections
   for (const sectionId of caseHistory) {
     const sectionReference = caseParsed[sectionId]; // This is the reference section with solution and stuff
@@ -29,15 +46,20 @@ async function evaluateCase(sessionId: number) {
       throw new TRPCError({ code: "NOT_FOUND" });
     }
     sectionEvaluations.push(
-      //await evaluateSection(sessionId, sectionId, sectionReference),
-      "caseHistory,",
+      await evaluateSection(sessionId, sectionId, sectionReference),
     );
-  }*/
-  console.log("case parsed");
+  }
 
-  // Overall evaluation of the case
-  const feedback = "You did great overall";
-  const overall_score = 8;
+  // Calculate overall score and overall feedback
+  let overall_score = 0;
+
+  for (const sectionEvaluation of sectionEvaluations) {
+    overall_score += sectionEvaluation.score;
+  }
+
+  overall_score = Math.round(overall_score / sectionEvaluations.length);
+
+  const feedback = "YET TO BE IMPLEMENTED";
   const state = "CREATING_EVALUATION";
 
   // Create an evaluation object
@@ -54,24 +76,20 @@ async function evaluateCase(sessionId: number) {
     where: (evaluations, { eq }) => eq(evaluations.caseSessionId, session.id),
   });
 
-  console.log("fuck");
-
   // Create evaluation components
-  /*for await (const sectionEvaluation of sectionEvaluations) {
+  for await (const sectionEvaluation of sectionEvaluations) {
     await db.insert(evaluationComponents).values([
       {
         evaluationId: evaluation!.id,
-        sectionId: "0",
-        score: 10,
-        feedback: "feedback",
+        sectionId: sectionEvaluation.sectionId,
+        score: sectionEvaluation.score,
+        feedback: sectionEvaluation.feedback,
       },
     ]);
-  }*/
-
-  // Update the state of the evaluation and calculate the overall score
+  }
 
   // return some evaluationObject
-  return evaluation!.id;
+  return evaluation;
 }
 
 async function evaluateSection(
@@ -79,8 +97,8 @@ async function evaluateSection(
   sectionId: string,
   sectionReference: CaseComponent,
 ) {
-  // retrieve only components that are of type Interviewer or Candidate
-  /*const conversationComponentsRetrieved =
+  //retrieve only components that are of type Interviewer or Candidate
+  const conversationComponentsRetrieved =
     await db.query.conversationComponents.findMany({
       where: (conversationComponents, { and, eq }) =>
         and(
@@ -98,40 +116,29 @@ async function evaluateSection(
 
   const conversationString = conversationComponentsRetrieved
     .map((component) => prependTag(component.content, component.type))
-    .join("\n\n");*/
+    .join("\n\n");
 
-  /*const llm = new VertexAIWrapper();
+  const llm = new VertexAIWrapper();
 
-  const evaluationPrompt =
-    "Please evaluate how the candidate performed on the following section:\n\n" +
-    conversationString;
+  // Get prompt based on sectionReference
+  const evaluationTemplate = evaluationTemplateFactory(sectionReference);
+
+  const evaluationFeedbackPrompt =
+    evaluationTemplate.getEvaluationPrompt(conversationString);
 
   const evaluationScorePrompt =
-    "Please evalate how the candidate performed on the following section. Only output a number between 0 and 10 with 10 being the highest. Do not output anything else.\n\n" +
-    conversationString;
+    evaluationTemplate.getEvaluationScorePrompt(conversationString);
 
-  const feedback = await llm.predict(evaluationPrompt);
-  const score = await llm.predict(evaluationScorePrompt); //TODO: Check if score is a number between 0 and 10*/
+  const feedback = await llm.predict(evaluationFeedbackPrompt);
+  const score = parseInt(await llm.predict(evaluationScorePrompt)); //TODO: Check if score is a number between 0 and 10*/
 
   // return some evaluationObject
   return {
-    sectionId: sectionId,
-    score: 5,
-    feedback: "Feedback",
+    sectionId,
+    score,
+    feedback,
+    conversationString,
   };
 }
 
 export { evaluateCase };
-
-// Two functions
-
-// Generate evaluation
-// - One big function for creating the evaluation
-
-// Subfunctions
-
-// Evaluate component function
-
-// Evaluate
-
-// Call LLM With Wrapper and wrapper should be parsed function

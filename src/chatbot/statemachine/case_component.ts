@@ -68,7 +68,7 @@ export class CaseComponent {
   }
 }
 
-class CaseComponentWithSolution extends CaseComponent {
+export class CaseComponentWithSolution extends CaseComponent {
   solution: string;
 
   constructor(

@@ -16,8 +16,6 @@ const CaseTile = (props: {
 }) => {
   const { title, isCompleted, sessionId, createdAt } = props;
 
-  console.log("CreatedAt", createdAt);
-
   const textContent = isCompleted ? "Completed" : "In Progress";
   const textColor = isCompleted ? "text-green-500" : "text-yellow-500";
   const router = useRouter();

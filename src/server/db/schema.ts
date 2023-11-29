@@ -230,6 +230,8 @@ export const evaluationComponents = mysqlTable("evaluation_components", {
   feedback: text("feedback").notNull(),
 });
 
+export type EvaluationComponent = typeof evaluationComponents.$inferSelect;
+
 export const evaluationComponentsRelationship = relations(
   evaluationComponents,
   ({ one }) => ({

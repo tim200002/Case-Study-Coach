@@ -1,4 +1,4 @@
-import { CaseComponent } from "./case_component";
+import { CaseComponent, CaseComponentWithSolution } from "./case_component";
 import { CaseStructureComponent } from "./case_structure_component";
 import { JSON_TYPES } from "./types";
 
@@ -45,7 +45,7 @@ export class Parser {
         const jsonType: JSON_TYPES = child.jsonType;
         switch (jsonType) {
           case JSON_TYPES.CASE_COMPONENT:
-            children.push(CaseComponent.fromJson(child, null));
+            children.push(CaseComponentWithSolution.fromJson(child, null));
             break;
           case JSON_TYPES.CASE_STRUCTURE:
             children.push(...recursiveRunner(child));
