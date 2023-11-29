@@ -219,7 +219,6 @@ export class CaseSynthesisComponent extends CaseComponentWithSolution {
       json.status,
       getSolutionFromJson(json),
       json.additionalCommands,
-      json.additionalInformation,
     );
   }
 }
