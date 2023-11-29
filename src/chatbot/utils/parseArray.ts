@@ -18,7 +18,7 @@ export function parseArrayFromJson<T>(json: string | null) {
 }
 
 export function parseCaseStateFromJsonFlat(json: any) {
-  function recursiveRunner(json: JSONObject) {
+  function recursiveRunner(json: any) {
     const children: CaseComponent[] = [];
     for (const child of json.children) {
       const jsonType: JSON_TYPES = child.jsonType;

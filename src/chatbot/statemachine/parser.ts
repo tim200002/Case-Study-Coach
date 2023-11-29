@@ -1,3 +1,4 @@
+import { JSONObject } from "superjson/dist/types";
 import { CaseComponent, CaseComponentWithSolution } from "./case_component";
 import { CaseStructureComponent } from "./case_structure_component";
 import { JSON_TYPES } from "./types";
@@ -39,8 +40,9 @@ export class Parser {
   }
 
   static parseCaseStateFromJsonFlat(json: any) {
-    function recursiveRunner(json: JSONObject) {
+    function recursiveRunner(json: any) {
       const children: CaseComponent[] = [];
+
       for (const child of json.children) {
         const jsonType: JSON_TYPES = child.jsonType;
         switch (jsonType) {
