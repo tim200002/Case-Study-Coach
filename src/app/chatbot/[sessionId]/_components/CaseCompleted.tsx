@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 const CaseCompleted = (props: { sessionId: number }) => {
   const { sessionId } = props;
-  const [evaluationId, setEvaluationId] = useState<number>(null);
+  const [evaluationId, setEvaluationId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
