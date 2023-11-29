@@ -10,7 +10,6 @@ import {
 import Chat from "./chat";
 import EvaluationComponentDisplay from "./evaluation_component_display";
 import { CaseInfo } from "./case_info";
-import { api } from "~/trpc/react";
 
 export default function ClientContainer(props: {
   sectionConversationDict: Record<string, ConversationComponent[]>;
@@ -38,16 +37,16 @@ export default function ClientContainer(props: {
 
   const [selectedSection, setSelectedSection] = useState<string>("0");
   const [conversation, setConversation] = useState<ConversationComponent[]>(
-    sectionConversationDict[selectedSection],
+    sectionConversationDict[selectedSection]!,
   );
   const [evaluation, setEvaluation] = useState<EvaluationComponent>(
-    sectionEvaluationDict[selectedSection],
+    sectionEvaluationDict[selectedSection]!,
   );
 
   const handleClick = (sectionId: string) => {
     setSelectedSection(sectionId);
-    setConversation(sectionConversationDict[sectionId]);
-    setEvaluation(sectionEvaluationDict[sectionId]);
+    setConversation(sectionConversationDict[sectionId]!);
+    setEvaluation(sectionEvaluationDict[sectionId]!);
   };
 
   return (
