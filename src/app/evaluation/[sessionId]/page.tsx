@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 async function getConversationComponents(
   sessionId: number,
-  sectionId: number,
+  sectionId: string,
 ): Promise<ConversationComponent[]> {
   const conversationComponentsRetrieved =
     await db.query.conversationComponents.findMany({
@@ -100,7 +100,7 @@ async function MainContent(props: { sessionId: number }) {
 
     const conversationComponents = await getConversationComponents(
       sessionId,
-      parseInt(sectionId),
+      sectionId,
     );
 
     let sessionName = (sectionReference.type as string).toLowerCase();
