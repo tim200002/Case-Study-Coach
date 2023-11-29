@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { api } from "~/trpc/react";
 
 const CaseCompleted = (props: { sessionId: number }) => {
   const { sessionId } = props;
