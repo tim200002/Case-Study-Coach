@@ -14,6 +14,7 @@ import {
   varchar,
   float,
 } from "drizzle-orm/mysql-core";
+import { string } from "zod";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -210,6 +211,7 @@ export const evaluations = mysqlTable("evaluations", {
     .notNull(),
   overallScore: float("overall_score").notNull(),
   overallFeedback: text("overall_feedback").notNull(),
+  videoSentimentAnalysis: json("video_sentiment_analysis"),
 });
 
 export const evaluationsRelationship = relations(evaluations, ({ one }) => ({
@@ -241,3 +243,26 @@ export const evaluationComponentsRelationship = relations(
     }),
   }),
 );
+
+// export const finalVideoSentimentAnalysisComponents = mysqlTable(
+//   "final_video_sentiment_analysis_components",
+//   {
+//     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+//     evaluationId: int("evaluation_id").notNull(),
+//     score: float("score").notNull(),
+//     recommendation: varchar("recommendation").notNull(),
+//     createdAt: timestamp("created_at")
+//       .default(sql`CURRENT_TIMESTAMP`)
+//       .notNull(),
+//   },
+// );
+
+// finalVideoSentimentAnalysisComponentsRelationship = relations(
+//   finalVideoSentimentAnalysisComponents,
+//   ({ one }) => ({
+//     evaluation: one(evaluations, {
+//       fields: [finalVideoSentimentAnalysisComponents.evaluationId],
+//       references: [evaluations.id],
+//     }),
+//   }),
+// );

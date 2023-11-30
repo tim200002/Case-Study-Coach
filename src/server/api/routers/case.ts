@@ -6,6 +6,7 @@ import {
   cases,
   evaluationComponents,
   evaluations,
+  videoAnalysisComponents,
 } from "~/server/db/schema";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
@@ -81,8 +82,10 @@ export const caseRouter = createTRPCRouter({
   createEvaluation: privateProcedure
     .input(z.object({ sessionId: z.number() }))
     .mutation(async ({ input }) => {
+      // Get evluation from case responses
       const evaluationId = await evaluateCase(input.sessionId);
 
+      //return evaluationId;
       return evaluationId;
     }),
 

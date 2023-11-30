@@ -62,6 +62,18 @@ async function evaluateCase(sessionId: number) {
   const feedback = "YET TO BE IMPLEMENTED";
   const state = "CREATING_EVALUATION";
 
+  //! ToDo refactor into additional function. Also it is a the wrong place
+  // sentiment analysis
+  // fetch video analysis components related to this session
+  const sessionVideoAnalysisComponents =
+    await db.query.videoAnalysisComponents.findMany({
+      where: eq(videoAnalysisComponents.caseSessionId, input.sessionId),
+    });
+
+  // check if evaluations exsits and if there are enough video analysis components
+
+  // create analysis with dowa, maybe some score
+
   // Create an evaluation object
   await db.insert(evaluations).values([
     {
@@ -69,6 +81,7 @@ async function evaluateCase(sessionId: number) {
       overallScore: overall_score,
       overallFeedback: feedback,
       state: state,
+      // videoSentimentAnalysis: videoSentimentAnalysis,
     },
   ]);
 
