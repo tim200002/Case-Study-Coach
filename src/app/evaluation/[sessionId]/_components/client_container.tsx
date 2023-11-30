@@ -70,7 +70,7 @@ export default function ClientContainer(props: {
   return (
     <>
       <h1 className="my-4 text-center text-4xl font-bold">Case Evaluation</h1>
-      <div className="mx-5 flex max-h-screen grow flex-row overflow-auto">
+      <div className="mx-5 flex max-h-[80vh] grow flex-row overflow-auto">
         <div className=" flex w-1/3 flex-col items-stretch">
           <CaseInfo case={caseInfo} />
           {sections.map((sectionId) => (
