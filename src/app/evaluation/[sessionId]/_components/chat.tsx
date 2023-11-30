@@ -44,7 +44,7 @@ export default function Chat(props: { conversation: ConversationComponent[] }) {
   const { conversation } = props;
 
   return (
-    <div className="flex max-h-full w-full flex-col items-center p-2">
+    <div className="flex w-full flex-col items-center p-2">
       <ul className="grid grid-cols-3 space-y-5 overflow-scroll">
         {conversation.map((message) => (
           <ChatBubble

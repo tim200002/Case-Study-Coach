@@ -62,17 +62,14 @@ async function evaluateCase(sessionId: number) {
   const feedback = "YET TO BE IMPLEMENTED";
   const state = "CREATING_EVALUATION";
 
-  //! ToDo refactor into additional function. Also it is a the wrong place
-  // sentiment analysis
-  // fetch video analysis components related to this session
-  const sessionVideoAnalysisComponents =
-    await db.query.videoAnalysisComponents.findMany({
-      where: eq(videoAnalysisComponents.caseSessionId, input.sessionId),
-    });
-
-  // check if evaluations exsits and if there are enough video analysis components
-
-  // create analysis with dowa, maybe some score
+  // Evaluate video analysis
+  const {
+    overall_joy_score,
+    overall_anger_score,
+    overall_sorrow_score,
+    overall_surprise_score,
+    llm_sentiment_feedback,
+  } = await evaluateVideoAnalysis(sessionId);
 
   // Create an evaluation object
   await db.insert(evaluations).values([
@@ -81,7 +78,11 @@ async function evaluateCase(sessionId: number) {
       overallScore: overall_score,
       overallFeedback: feedback,
       state: state,
-      // videoSentimentAnalysis: videoSentimentAnalysis,
+      joyScore: overall_joy_score,
+      angerScore: overall_anger_score,
+      sorrowScore: overall_sorrow_score,
+      surpriseScore: overall_surprise_score,
+      sentimentFeedback: llm_sentiment_feedback,
     },
   ]);
 
@@ -103,6 +104,74 @@ async function evaluateCase(sessionId: number) {
 
   // return some evaluationObject
   return evaluation;
+}
+
+function getLikelihoodScore(likelihood: string) {
+  switch (likelihood) {
+    case "VERY_LIKELY":
+      return 4;
+    case "LIKELY":
+      return 3;
+    case "POSSIBLE":
+      return 2;
+    case "UNLIKELY":
+      return 1;
+    case "VERY_UNLIKELY":
+      return 0;
+    default:
+      return 0;
+  }
+}
+
+async function evaluateVideoAnalysis(sessionId: number) {
+  // fetch video analysis components related to this session
+  const sessionVideoAnalysisComponents =
+    await db.query.videoAnalysisComponents.findMany({
+      where: (videoAnalysisComponents, { eq }) =>
+        eq(videoAnalysisComponents.caseSessionId, sessionId),
+      orderBy: (component, { desc }) => [desc(component.createdAt)],
+    });
+
+  let joyscore = 0;
+  let angerscore = 0;
+  let sorrowscore = 0;
+  let surprisescore = 0;
+
+  for (const videoAnanlysisComponent of sessionVideoAnalysisComponents) {
+    joyscore += getLikelihoodScore(
+      videoAnanlysisComponent.joyLikelihood as string,
+    );
+    angerscore += getLikelihoodScore(
+      videoAnanlysisComponent.angerLikelihood as string,
+    );
+    sorrowscore += getLikelihoodScore(
+      videoAnanlysisComponent.sorrowLikelihood as string,
+    );
+    surprisescore += getLikelihoodScore(
+      videoAnanlysisComponent.surpriseLikelihood as string,
+    );
+  }
+
+  const overall_joy_score = joyscore / sessionVideoAnalysisComponents.length;
+  const overall_anger_score =
+    angerscore / sessionVideoAnalysisComponents.length;
+  const overall_sorrow_score =
+    sorrowscore / sessionVideoAnalysisComponents.length;
+  const overall_surprise_score =
+    surprisescore / sessionVideoAnalysisComponents.length;
+
+  const llm_sentiment_prompt = `The candidate just completed a job interview. Video analysis was conducted during the inverview which scored the candidates likelihood of expressing the following emotions: joy, anger, sorrow and surprise on a scale from 0 - 4. The following are the results:  ${overall_joy_score} joyful, ${overall_anger_score} anger, ${overall_sorrow_score} sorrow and ${overall_surprise_score} surprise. Please give feedback only on the candidates emotional performance during the interview of 2 or 3 sentences and how that may be interpreted in an interview situation. Higher scores of joy should be rewarded and lower scores of sorrow and anger should also be rewaer The response should be addressed to the candidate directly.`;
+  const llm = new VertexAIWrapper();
+
+  const llm_sentiment_feedback = await llm.predict(llm_sentiment_prompt);
+
+  return {
+    overall_joy_score,
+    overall_anger_score,
+    overall_sorrow_score,
+    overall_surprise_score,
+    llm_sentiment_feedback,
+  };
 }
 
 async function evaluateSection(

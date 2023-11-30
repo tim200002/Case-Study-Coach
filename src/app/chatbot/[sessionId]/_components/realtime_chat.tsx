@@ -3,7 +3,7 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import Spinner from "~/app/_components/spinner";
 import { ConversationComponent } from "~/server/db/schema";
-import CaseCompleted from "./CaseCompleted";
+import CaseCompleted from "./case_completed";
 import { api } from "~/trpc/react";
 import { TextInput } from "./text_input";
 import { VoiceRecorderButton } from "./voice_recorder";

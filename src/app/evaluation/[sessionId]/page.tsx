@@ -116,15 +116,13 @@ async function MainContent(props: { sessionId: number }) {
   }
 
   return (
-    <div>
-      <ClientContainer
-        sectionConversationDict={sectionConversationDict}
-        sectionEvaluationDict={sectionEvaluationDict}
-        sectionNamesDict={sectionNamesDict}
-        caseInfo={session.case}
-        sessionId={sessionId}
-      />
-    </div>
+    <ClientContainer
+      sectionConversationDict={sectionConversationDict}
+      sectionEvaluationDict={sectionEvaluationDict}
+      sectionNamesDict={sectionNamesDict}
+      caseInfo={session.case}
+      sessionId={sessionId}
+    />
   );
 }
 

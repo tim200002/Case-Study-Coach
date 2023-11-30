@@ -211,7 +211,11 @@ export const evaluations = mysqlTable("evaluations", {
     .notNull(),
   overallScore: float("overall_score").notNull(),
   overallFeedback: text("overall_feedback").notNull(),
-  videoSentimentAnalysis: json("video_sentiment_analysis"),
+  joyScore: float("joy_score"),
+  angerScore: float("anger_score"),
+  sorrowScore: float("sorrow_score"),
+  surpriseScore: float("surprise_score"),
+  sentimentFeedback: text("sentiment_feedback"),
 });
 
 export const evaluationsRelationship = relations(evaluations, ({ one }) => ({
