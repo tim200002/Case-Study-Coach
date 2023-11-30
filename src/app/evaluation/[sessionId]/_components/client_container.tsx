@@ -4,18 +4,21 @@ import { useState } from "react";
 import {
   type EvaluationComponent,
   type ConversationComponent,
-  Case,
+  type Evaluation,
+  type Case,
 } from "~/server/db/schema";
 
 import Chat from "./chat";
 import EvaluationComponentDisplay from "./evaluation_component_display";
 import { CaseInfo } from "./case_info";
+import EmotionDisplay from "./emotion_display";
 
 export default function ClientContainer(props: {
   sectionConversationDict: Record<string, ConversationComponent[]>;
   sectionEvaluationDict: Record<string, EvaluationComponent>;
   sectionNamesDict: Record<string, string>;
   caseInfo: Case;
+  evaluation: Evaluation;
   sessionId: number;
 }) {
   const {
@@ -23,6 +26,7 @@ export default function ClientContainer(props: {
     sectionEvaluationDict,
     sectionNamesDict,
     caseInfo,
+    evaluation,
     sessionId,
   } = props;
 
@@ -34,19 +38,33 @@ export default function ClientContainer(props: {
   }
 
   const sections = Object.keys(sectionConversationDict);
-
   const [selectedSection, setSelectedSection] = useState<string>("0");
   const [conversation, setConversation] = useState<ConversationComponent[]>(
     sectionConversationDict[selectedSection]!,
   );
-  const [evaluation, setEvaluation] = useState<EvaluationComponent>(
-    sectionEvaluationDict[selectedSection]!,
-  );
+  const [evaluationComponent, setEvaluationComponent] =
+    useState<EvaluationComponent>(sectionEvaluationDict[selectedSection]!);
+
+  const hasVideoAnalysis = evaluation?.angerScore !== null;
+
+  console.log("hasVideoAnalysis", hasVideoAnalysis);
+
+  const [displayVideoAnalysis, setDisplayVideoAnalysis] =
+    useState<boolean>(false);
 
   const handleClick = (sectionId: string) => {
+    if (
+      !displayVideoAnalysis &&
+      hasVideoAnalysis &&
+      sectionId === (sections.length - 1).toString()
+    ) {
+      setDisplayVideoAnalysis(true);
+    } else if (displayVideoAnalysis) {
+      setDisplayVideoAnalysis(false);
+    }
     setSelectedSection(sectionId);
     setConversation(sectionConversationDict[sectionId]!);
-    setEvaluation(sectionEvaluationDict[sectionId]!);
+    setEvaluationComponent(sectionEvaluationDict[sectionId]!);
   };
 
   return (
@@ -71,9 +89,12 @@ export default function ClientContainer(props: {
             </div>
           ))}
         </div>
-        <Chat conversation={conversation} />
+        {!displayVideoAnalysis && <Chat conversation={conversation} />}
+        {displayVideoAnalysis && <EmotionDisplay evaluation={evaluation} />}
         <div className="flex w-1/3 flex-col items-end ">
-          <EvaluationComponentDisplay evaluationComponent={evaluation} />
+          <EvaluationComponentDisplay
+            evaluationComponent={evaluationComponent}
+          />
         </div>
       </div>
     </>

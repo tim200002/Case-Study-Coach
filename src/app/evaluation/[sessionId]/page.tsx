@@ -115,12 +115,29 @@ async function MainContent(props: { sessionId: number }) {
       sessionName.charAt(0).toUpperCase() + sessionName.slice(1);
   }
 
+  const hasVideoAnalysis = evaluation?.angerScore !== null;
+
+  if (hasVideoAnalysis) {
+    const videoSectionId = Object.keys(sectionNamesDict).length.toString();
+    sectionNamesDict[videoSectionId] = "Video Analysis";
+    sectionConversationDict[videoSectionId] = [];
+    sectionEvaluationDict[videoSectionId] = {
+      id: -1,
+      evaluationId: evaluation!.id,
+      createdAt: new Date(),
+      sectionId: videoSectionId,
+      score: 10,
+      feedback: evaluation.sentimentFeedback as string,
+    };
+  }
+
   return (
     <ClientContainer
       sectionConversationDict={sectionConversationDict}
       sectionEvaluationDict={sectionEvaluationDict}
       sectionNamesDict={sectionNamesDict}
       caseInfo={session.case}
+      evaluation={evaluation}
       sessionId={sessionId}
     />
   );

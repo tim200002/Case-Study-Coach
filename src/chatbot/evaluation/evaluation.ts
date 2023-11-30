@@ -18,7 +18,6 @@ type EvaluationComponentObject = {
   sectionId: string;
   score: number;
   feedback: string;
-  conversationString: string;
 };
 
 async function evaluateCase(sessionId: number) {
@@ -219,7 +218,6 @@ async function evaluateSection(
     sectionId,
     score,
     feedback,
-    conversationString,
   };
 }
 

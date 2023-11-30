@@ -218,6 +218,8 @@ export const evaluations = mysqlTable("evaluations", {
   sentimentFeedback: text("sentiment_feedback"),
 });
 
+export type Evaluation = typeof evaluations.$inferSelect;
+
 export const evaluationsRelationship = relations(evaluations, ({ one }) => ({
   case: one(caseSessions, {
     fields: [evaluations.caseSessionId],
