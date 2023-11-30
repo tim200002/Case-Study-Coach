@@ -14,6 +14,7 @@ const CompletedCaseList = (props: {
     caseCompleted: boolean;
     sessionId: number;
     createdAt: Date;
+    evaluationScore: number;
   }[];
 }) => {
   const { cases } = props;
@@ -28,6 +29,7 @@ const CompletedCaseList = (props: {
               isCompleted={info.caseCompleted}
               sessionId={info.sessionId}
               createdAt={info.createdAt}
+              evaluationScore={info.evaluationScore}
             />
           );
         })}
@@ -38,6 +40,14 @@ const CompletedCaseList = (props: {
 
 export default async function Stats() {
   const userCases = await api.case.getUserCases.query();
+
+  for (const userCase of userCases) {
+    const evaluation = await api.case.getEvaluation.query({
+      sessionId: userCase.sessionId,
+    });
+
+    userCase.evaluationScore = evaluation?.overallScore ?? null;
+  }
 
   return (
     <div>

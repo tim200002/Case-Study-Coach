@@ -126,7 +126,7 @@ async function MainContent(props: { sessionId: number }) {
       evaluationId: evaluation!.id,
       createdAt: new Date(),
       sectionId: videoSectionId,
-      score: 10,
+      score: -1,
       feedback: evaluation.sentimentFeedback as string,
     };
   }
