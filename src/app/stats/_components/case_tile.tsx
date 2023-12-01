@@ -13,7 +13,7 @@ const CaseTile = (props: {
   isCompleted: boolean;
   sessionId: number;
   createdAt: Date;
-  evaluationScore: number;
+  evaluationScore?: number;
 }) => {
   const { title, isCompleted, sessionId, createdAt, evaluationScore } = props;
 
