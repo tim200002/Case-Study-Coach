@@ -14,6 +14,7 @@ import {
   varchar,
   float,
 } from "drizzle-orm/mysql-core";
+import { string } from "zod";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -205,9 +206,19 @@ export const evaluations = mysqlTable("evaluations", {
   createdAt: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
+  state: mysqlEnum("state", ["CREATING_EVALUATION", "EVALUATED"])
+    .default("CREATING_EVALUATION")
+    .notNull(),
   overallScore: float("overall_score").notNull(),
   overallFeedback: text("overall_feedback").notNull(),
+  joyScore: float("joy_score"),
+  angerScore: float("anger_score"),
+  sorrowScore: float("sorrow_score"),
+  surpriseScore: float("surprise_score"),
+  sentimentFeedback: text("sentiment_feedback"),
 });
+
+export type Evaluation = typeof evaluations.$inferSelect;
 
 export const evaluationsRelationship = relations(evaluations, ({ one }) => ({
   case: one(caseSessions, {
@@ -227,6 +238,8 @@ export const evaluationComponents = mysqlTable("evaluation_components", {
   feedback: text("feedback").notNull(),
 });
 
+export type EvaluationComponent = typeof evaluationComponents.$inferSelect;
+
 export const evaluationComponentsRelationship = relations(
   evaluationComponents,
   ({ one }) => ({
@@ -236,3 +249,26 @@ export const evaluationComponentsRelationship = relations(
     }),
   }),
 );
+
+// export const finalVideoSentimentAnalysisComponents = mysqlTable(
+//   "final_video_sentiment_analysis_components",
+//   {
+//     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+//     evaluationId: int("evaluation_id").notNull(),
+//     score: float("score").notNull(),
+//     recommendation: varchar("recommendation").notNull(),
+//     createdAt: timestamp("created_at")
+//       .default(sql`CURRENT_TIMESTAMP`)
+//       .notNull(),
+//   },
+// );
+
+// finalVideoSentimentAnalysisComponentsRelationship = relations(
+//   finalVideoSentimentAnalysisComponents,
+//   ({ one }) => ({
+//     evaluation: one(evaluations, {
+//       fields: [finalVideoSentimentAnalysisComponents.evaluationId],
+//       references: [evaluations.id],
+//     }),
+//   }),
+// );

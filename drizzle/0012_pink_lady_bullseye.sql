@@ -1,0 +1,1 @@
+ALTER TABLE `frontend_evaluation_components` ADD `conversation_string` text NOT NULL;

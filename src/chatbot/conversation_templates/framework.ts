@@ -22,9 +22,16 @@ Start this section by asking the candidate to explain his framework to you. Make
 - A good framework should consists of 2-4 buckets. The buckets should be mutually exclusive but in total cover all important aspects of the case.
 - The candidate should not just provide the buckets but more information what exactly he wants to tackle exactly within each bucket
 - The candidate must not match the reference solution one to one but should provide most information. It is your task to evaluate if the candidate has given enough information.
-- Be very critical and do not let the candidate leave before his developed framework is good
 
-Respond with "${prependTag("True", "SYSTEM", true)}" if this section is completed, otherwise respond with "${prependTag("False", "SYSTEM", true)}".`;
+Respond with "${prependTag(
+      "True",
+      "SYSTEM",
+      true,
+    )}" if this section is completed, otherwise respond with "${prependTag(
+      "False",
+      "SYSTEM",
+      true,
+    )}".`;
 
     return completionPrompt;
   }

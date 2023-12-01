@@ -1,0 +1,1 @@
+ALTER TABLE `frontend_evaluation_components` DROP COLUMN `conversation_string`;

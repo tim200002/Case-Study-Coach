@@ -9,6 +9,8 @@ import {
 } from "../statemachine/case_component";
 import { FrameworkTemplate } from "./framework";
 import { NumeracyTemplate } from "./numeracy";
+import { CreativeTemplate } from "./creative";
+import { SynthesisTemplate } from "./synthesis";
 
 export default function conversationTemplateFactory(
   caseComponent: CaseComponent,
@@ -25,11 +27,13 @@ export default function conversationTemplateFactory(
         case CASE_QUESTION_TYPE.NUMERIC:
           return new NumeracyTemplate(caseComponent as CaseQuestionComponent);
         case CASE_QUESTION_TYPE.CREATIVE:
-          throw new Error("Not Implemented");
+          return new CreativeTemplate(caseComponent as CaseQuestionComponent);
         default:
-          throw new Error("Unknown Question Type");
+          throw new Error("Unknown Type");
       }
     }
+    case Case_Component_Type.SYNTHESIS:
+      return new SynthesisTemplate(caseComponent as CaseQuestionComponent);
     default:
       throw new Error("Unknown Case Component Type");
   }

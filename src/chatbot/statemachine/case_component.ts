@@ -68,7 +68,7 @@ export class CaseComponent {
   }
 }
 
-class CaseComponentWithSolution extends CaseComponent {
+export class CaseComponentWithSolution extends CaseComponent {
   solution: string;
 
   constructor(
@@ -202,7 +202,6 @@ export class CaseSynthesisComponent extends CaseComponentWithSolution {
     status: Case_Component_Status,
     solution: string,
     additionalCommands?: string[],
-    additionalInformation?: string[],
   ) {
     super(
       id,
@@ -211,7 +210,6 @@ export class CaseSynthesisComponent extends CaseComponentWithSolution {
       status,
       solution,
       additionalCommands,
-      additionalInformation,
     );
   }
 
@@ -221,7 +219,6 @@ export class CaseSynthesisComponent extends CaseComponentWithSolution {
       json.status,
       getSolutionFromJson(json),
       json.additionalCommands,
-      json.additionalInformation,
     );
   }
 }

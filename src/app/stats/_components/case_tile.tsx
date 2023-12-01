@@ -13,10 +13,9 @@ const CaseTile = (props: {
   isCompleted: boolean;
   sessionId: number;
   createdAt: Date;
+  evaluationScore?: number;
 }) => {
-  const { title, isCompleted, sessionId, createdAt } = props;
-
-  console.log("CreatedAt", createdAt);
+  const { title, isCompleted, sessionId, createdAt, evaluationScore } = props;
 
   const textContent = isCompleted ? "Completed" : "In Progress";
   const textColor = isCompleted ? "text-green-500" : "text-yellow-500";
@@ -56,7 +55,10 @@ const CaseTile = (props: {
 
   return (
     <div className="m-2 flex flex-col rounded border p-6 shadow-md">
-      <h1 className="text-l font-semibold">{title}</h1>
+      <div className="text-l flex flex-row justify-between font-semibold">
+        <h1>{title}</h1>
+        {evaluationScore && <h1>Score: {evaluationScore}/10</h1>}
+      </div>
       <p className="text-sm text-gray-500">
         Started on {new Date(createdAt).toLocaleDateString()}
       </p>

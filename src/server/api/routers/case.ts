@@ -1,8 +1,16 @@
 import { and, eq } from "drizzle-orm";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
-import { caseSessions, cases } from "~/server/db/schema";
+import {
+  caseSessions,
+  cases,
+  evaluationComponents,
+  evaluations,
+  videoAnalysisComponents,
+} from "~/server/db/schema";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
+import { evaluateCase } from "~/chatbot/evaluation/evaluation";
 
 export const caseRouter = createTRPCRouter({
   getAll: privateProcedure.query(async () => {
@@ -64,11 +72,33 @@ export const caseRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const { sessionId } = input;
 
-      const evaluation = await db.query.caseSessions.findFirst({
-        where: eq(caseSessions.id, sessionId),
+      const evaluation = await db.query.evaluations.findFirst({
+        where: eq(evaluations.caseSessionId, sessionId),
       });
 
       return evaluation;
+    }),
+
+  createEvaluation: privateProcedure
+    .input(z.object({ sessionId: z.number() }))
+    .mutation(async ({ input }) => {
+      // Get evluation from case responses
+      const evaluationId = await evaluateCase(input.sessionId);
+
+      //return evaluationId;
+      return evaluationId;
+    }),
+
+  getEvaluationComponents: privateProcedure
+    .input(z.object({ evaluationId: z.number() }))
+    .query(async ({ input }) => {
+      const { evaluationId } = input;
+
+      const components = await db.query.evaluationComponents.findMany({
+        where: eq(evaluationComponents.evaluationId, evaluationId),
+      });
+
+      return components;
     }),
 
   // hello: publicProcedure

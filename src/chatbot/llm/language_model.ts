@@ -161,10 +161,13 @@ export default class LanguageModel {
   }
 
   private _convertExtendedContextToPrompt(extended_context: ExtendedContext[]) {
-    const prompt = extended_context.map((component) =>
-      prependTag(component.content, component.type),
-    );
+    const promptText = extended_context
+      .map((component) => prependTag(component.content, component.type))
+      .join("\n\n");
 
-    return prompt.join("\n\n");
+    return prependTag(
+      `Below you can find the history of your responses that were wrong. Please use these to optimize your responses. \n\n${promptText}`,
+      "COMMAND",
+    );
   }
 }
