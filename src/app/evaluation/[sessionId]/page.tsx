@@ -127,7 +127,7 @@ async function MainContent(props: { sessionId: number }) {
       createdAt: new Date(),
       sectionId: videoSectionId,
       score: -1,
-      feedback: evaluation.sentimentFeedback as string,
+      feedback: evaluation!.sentimentFeedback as string,
     };
   }
 
@@ -137,7 +137,7 @@ async function MainContent(props: { sessionId: number }) {
       sectionEvaluationDict={sectionEvaluationDict}
       sectionNamesDict={sectionNamesDict}
       caseInfo={session.case}
-      evaluation={evaluation}
+      evaluation={evaluation!}
       sessionId={sessionId}
     />
   );

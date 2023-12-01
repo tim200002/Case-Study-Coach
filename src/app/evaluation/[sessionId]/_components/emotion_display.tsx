@@ -45,7 +45,7 @@ export default function EmotionDisplay(props: { evaluation: Evaluation }) {
             key={emotionScore.emotion}
             emotion={emotionScore.emotion}
             icon={emotionScore.icon}
-            score={emotionScore.score}
+            score={emotionScore.score!}
           />
         ))}
       </div>
