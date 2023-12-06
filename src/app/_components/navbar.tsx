@@ -18,8 +18,8 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="bg-white py-4">
-      <div className="flex items-center justify-between border-b border-gray-200 bg-white py-4">
+    <header className="py-4">
+      <div className="flex items-center justify-between border-b border-gray-200 py-4">
         {/* Logo and header text */}
         <div className="ml-4">
           <Link href={"/"}>

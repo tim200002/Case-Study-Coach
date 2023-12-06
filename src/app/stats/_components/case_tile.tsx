@@ -54,7 +54,7 @@ const CaseTile = (props: {
   };
 
   return (
-    <div className="m-2 flex flex-col rounded border p-6 shadow-md">
+    <div className="m-2 flex flex-col rounded border bg-white p-6 shadow-md">
       <div className="text-l flex flex-row justify-between font-semibold">
         <h1>{title}</h1>
         {evaluationScore && <h1>Score: {evaluationScore}/10</h1>}
