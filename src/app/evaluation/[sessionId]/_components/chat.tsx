@@ -30,11 +30,17 @@ const ChatBubble = (props: { message: ConversationComponent | string }) => {
       <div
         className={`rounded-2xl p-5 ${
           isMessageFromCandidate()
-            ? "rounded-tr-none bg-green-300"
-            : "rounded-tl-none bg-red-300"
-        }`}
+            ? "rounded-tr-none bg-blue-500"
+            : "rounded-tl-none bg-white"
+        } shadow-md`}
       >
-        <div className="break-words text-base">{messageContent}</div>
+        <div
+          className={`break-words text-lg ${
+            isMessageFromCandidate() ? "text-white" : "text-black"
+          }`}
+        >
+          {messageContent}
+        </div>
       </div>
     </div>
   );
