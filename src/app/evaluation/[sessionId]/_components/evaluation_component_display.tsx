@@ -1,5 +1,6 @@
 "use client";
 
+import { text } from "stream/consumers";
 import { type EvaluationComponent } from "~/server/db/schema";
 
 export default function EvaluationComponentDisplay(props: {
@@ -105,5 +106,22 @@ function parseFeedback(feedback: string): TextSegment[] {
     });
   }
 
-  return segments;
+  if (segments.length === 0) {
+    return segments;
+  }
+
+  const segments_parsed: TextSegment[] = [];
+
+  for (let i = 0; i < segments.length; i++) {
+    segments_parsed.push(segments[i]!);
+    if (
+      i + 1 < segments.length &&
+      segments[i]!.bold &&
+      segments[i + 1]!.isDoubleLineBreak
+    ) {
+      i++;
+    }
+  }
+
+  return segments_parsed;
 }
