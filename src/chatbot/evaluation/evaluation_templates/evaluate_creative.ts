@@ -21,7 +21,7 @@ export class EvaluationCreativeTemplate implements EvaluationTemplateInterface {
   getEvaluationPrompt(conversationHistory: string): string {
     return `Evaluate the candidate's performance in the creativity part of the case. The output should be written as if addressing the candidate. The candidate's performance in this section is based on the following criteria:\n
     - The candidate should be able to perform a structured brainstorm. Their ideas should be structured into several buckets and the candidate should be able to argue which parts are the most important.\n
-    - The candidate should be able to identify many potential solutions or problems. However it is productive if these are unnecessary for solving the case.\n
+    - The candidate should be able to identify many potential solutions or problems. However it is unproductive if these are unnecessary for solving the case.\n
     - The candidate should identify and priortize the most important of the problem or solution and should dive deeper into these by their own.\n
     - The candidate's answer should be similar to the following answer:
     ${this.referenceSolution}\n\n
