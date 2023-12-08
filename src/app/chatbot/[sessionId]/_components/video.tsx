@@ -44,10 +44,14 @@ const VideoFeed = (props: {
 }) => {
   const [state, setState] = useState(Recording_State.INITIAL);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const pushNotificationCounter = useRef(0);
   const { mutate, isLoading } = api.analysis.analyzeScreenshot.useMutation({
     onSuccess: (data) => {
       if (data) {
-        props.onNewNotification(data);
+        if (pushNotificationCounter.current % 3 === 0) {
+          props.onNewNotification(data);
+        }
+        pushNotificationCounter.current++;
       }
     },
   });
