@@ -4,6 +4,9 @@ This project was developed as part of the Data Science lecture at Seoul National
 ## Demo
 Unfortunately, I am currently missing the API keys to host the project on my own. A short video demo from the final project presentation is provided below. The slides of the final presentation, better motivating our approach and solution, are provided here ([pdf](./assets/Presentation.pdf), [pptx](./assets/Presentation.pptx)).
 
+**Watch a Demo of our Case Stuy Coach in Action**
+
+https://github.com/user-attachments/assets/aa881da5-1cc6-4f06-a120-dd669701e831
 
 
 ## Project Overview
